@@ -1,180 +1,202 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import { Link, useNavigate } from 'react-router-dom'
-import { useDispatch } from 'react-redux'
-
-import formValidator from '../../FormValidators/formValidator'
-import imageValidator from '../../FormValidators/imageValidator'
-
-import { createBlog } from "../../Redux/ActionCreartors/BlogActionCreators"
-
-var rte
+import formValidator from "../../FormValidators/formValidator"
+import imageValidator from "../../FormValidators/imageValidator"
+import { createBlog, getBlog } from '../../Redux/ActionCreators/BlogActionCreators'
 
 export default function AdminCreateBlog() {
-    var refdiv = useRef(null);
-
     let [data, setData] = useState({
         title: "",
+        pic: "",
         shortDescription: "",
+        longDescription: "",
         category: "",
         tags: "",
-        author: "",
-        pic: [],
+        author: "Admin",
         active: true
     })
-
     let [error, setError] = useState({
-        title: "Title is mandatory",
-        shortDescription: "Short description is mandatory",
-        category: "Category is mandatory",
-        author: "Author name is mandatory",
-        pic: "Blog image is mandatory"
+        title: "Title Field is Mandatory",
+        pic: "Pic Field is Mandatory",
+        shortDescription: "Short Description Field is Mandatory",
+        longDescription: "Long Description Field is Mandatory",
+        category: "Category Field is Mandatory",
+        author: ""
     })
-
     let [show, setShow] = useState(false)
     let navigate = useNavigate()
+
+    let BlogStateData = useSelector(state => state.BlogStateData)
     let dispatch = useDispatch()
 
     function getInputData(e) {
         let name = e.target.name
         let value = e.target.files ? e.target.files[0] : e.target.value
 
-        if (name !== "active") {
-            setError((old) => ({
-                ...old,
-                [name]: e.target.files ? imageValidator(e) : formValidator(e)
-            }))
+        if (name !== "active" && name !== "tags") {
+            setError((old) => {
+                return {
+                    ...old,
+                    [name]: e.target.files ? imageValidator(e) : formValidator(e)
+                }
+            })
         }
-
-        setData((old) => ({
-            ...old,
-            [name]: name === "active" ? (value === "1" ? true : false) : value
-        }))
+        setData((old) => {
+            return {
+                ...old,
+                [name]: name === "active" ? (value === "1" ? true : false) : value
+            }
+        })
     }
 
     function postSubmit(e) {
         e.preventDefault()
-
         let errorItem = Object.values(error).find(x => x !== "")
-        if (errorItem) {
+        if (errorItem)
             setShow(true)
-        } else {
-
-            let formData = new FormData()
-            formData.append("title", data.title)
-            formData.append("shortDescription", data.shortDescription)
-            formData.append("category", data.category)
-            formData.append("tags", data.tags)
-            formData.append("author", data.author)
-            formData.append("pic", data.pic)
-            formData.append("longDescription", rte.getHTMLCode())
-            formData.append("active", data.active)
-
-            dispatch(createBlog(formData))
-
-            navigate("/blog")
+        else {
+            let item = BlogStateData.find(x => x.title.toLocaleLowerCase() === data.title.toLocaleLowerCase())
+            if (item) {
+                setShow(true)
+                setError((old) => {
+                    return {
+                        ...old,
+                        "title": "Blog Already Exist"
+                    }
+                })
+            }
+            else {
+                let formData = new FormData()
+                formData.append("title", data.title)
+                formData.append("pic", data.pic)
+                formData.append("shortDescription", data.shortDescription)
+                formData.append("longDescription", data.longDescription)
+                formData.append("category", data.category)
+                formData.append("tags", data.tags)
+                formData.append("author", data.author)
+                formData.append("active", data.active)
+                dispatch(createBlog(formData))
+                navigate("/blog")
+            }
         }
     }
 
     useEffect(() => {
-        rte = new window.RichTextEditor(refdiv.current);
-        rte.setHTMLCode("");
-    }, [])
+        (() => {
+            dispatch(getBlog())
+        })()
+    }, [BlogStateData.length])
 
     return (
         <>
-            <div>
-                <h5 className="bg-primary text-light text-center p-2">
-                    Create Blog
-                    <Link to="/blog">
-                        <i className="fa fa-arrow-left text-light float-end"></i>
-                    </Link>
+            <div className="container">
+                <h5 className="text-center text-light bg-primary p-2">
+                    Create Blog{' '}
+                    <Link to="/blog"><i className="fa fa-arrow-left text-light float-end pt-1"></i></Link>
                 </h5>
 
                 <div className="card mt-3 shadow-sm p-4">
                     <form onSubmit={postSubmit}>
 
-                        {/* Title */}
+                        {/* Title Field */}
                         <div className="mb-3">
-                            <label>Blog Title *</label>
+                            <label className="fw-bold">Title*</label>
                             <input
                                 type="text"
                                 name="title"
                                 onChange={getInputData}
-                                placeholder="Enter blog title"
-                                className={`form-control border-3 ${show && error.title ? "border-danger" : "border-primary"}`}
+                                placeholder="Enter Blog Title"
+                                className={`form-control ${show && error.title ? 'border-danger' : 'border-primary'}`}
                             />
-                            {show && error.title && <p className="text-danger">{error.title}</p>}
+                            {show && error.title && <p className="text-danger mt-1">{error.title}</p>}
                         </div>
 
                         {/* Short Description */}
                         <div className="mb-3">
-                            <label>Short Description *</label>
-                            <textarea
+                            <label className="fw-bold">Short Description*</label>
+                            <input
+                                type="text"
                                 name="shortDescription"
-                                placeholder="Short summary..."
                                 onChange={getInputData}
-                                className={`form-control border-3 ${show && error.shortDescription ? "border-danger" : "border-primary"}`}
-                                rows={3}
-                            ></textarea>
-                            {show && error.shortDescription && <p className="text-danger">{error.shortDescription}</p>}
+                                placeholder="Enter Short Description"
+                                className={`form-control ${show && error.shortDescription ? 'border-danger' : 'border-primary'}`}
+                            />
+                            {show && error.shortDescription && <p className="text-danger mt-1">{error.shortDescription}</p>}
                         </div>
 
                         {/* Long Description */}
                         <div className="mb-3">
-                            <label>Blog Content *</label>
-                            <div ref={refdiv} className="border-3 border-primary"></div>
+                            <label className="fw-bold">Long Description*</label>
+                            <textarea
+                                name="longDescription"
+                                onChange={getInputData}
+                                placeholder="Enter Long Description"
+                                rows={4}
+                                className={`form-control ${show && error.longDescription ? 'border-danger' : 'border-primary'}`}
+                            />
+                            {show && error.longDescription && <p className="text-danger mt-1">{error.longDescription}</p>}
                         </div>
 
+                        {/* Category & Author */}
                         <div className="row">
-
-                            {/* Category */}
                             <div className="col-md-6 mb-3">
-                                <label>Category *</label>
+                                <label className="fw-bold">Category*</label>
                                 <input
                                     type="text"
                                     name="category"
                                     onChange={getInputData}
-                                    placeholder="Blog category"
-                                    className={`form-control border-3 ${show && error.category ? "border-danger" : "border-primary"}`}
+                                    placeholder="Enter Category"
+                                    className={`form-control ${show && error.category ? 'border-danger' : 'border-primary'}`}
                                 />
-                                {show && error.category && <p className="text-danger">{error.category}</p>}
+                                {show && error.category && <p className="text-danger mt-1">{error.category}</p>}
                             </div>
 
-                            {/* Tags */}
                             <div className="col-md-6 mb-3">
-                                <label>Tags (comma separated)</label>
-                                <input
-                                    type="text"
-                                    name="tags"
-                                    onChange={getInputData}
-                                    placeholder="e.g. react, node, webdev"
-                                    className="form-control border-3 border-primary"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="row">
-
-                            {/* Author */}
-                            <div className="col-md-6 mb-3">
-                                <label>Author *</label>
+                                <label className="fw-bold">Author*</label>
                                 <input
                                     type="text"
                                     name="author"
                                     onChange={getInputData}
-                                    placeholder="Author name"
-                                    className={`form-control border-3 ${show && error.author ? "border-danger" : "border-primary"}`}
+                                    value={data.author}
+                                    placeholder="Enter Author Name"
+                                    className={`form-control ${show && error.author ? 'border-danger' : 'border-primary'}`}
                                 />
-                                {show && error.author && <p className="text-danger">{error.author}</p>}
+                                {show && error.author && <p className="text-danger mt-1">{error.author}</p>}
+                            </div>
+                        </div>
+
+                        {/* Tags */}
+                        <div className="mb-3">
+                            <label className="fw-bold">Tags</label>
+                            <input
+                                type="text"
+                                name="tags"
+                                onChange={getInputData}
+                                placeholder="Enter Tags (optional)"
+                                className="form-control border-primary"
+                            />
+                        </div>
+
+                        {/* File Upload & Active Status */}
+                        <div className="row">
+                            <div className="col-md-6 mb-3">
+                                <label className="fw-bold">Thumbnail Image*</label>
+                                <input
+                                    type="file"
+                                    name="pic"
+                                    onChange={getInputData}
+                                    className={`form-control ${show && error.pic ? 'border-danger' : 'border-primary'}`}
+                                />
+                                {show && error.pic && <p className="text-danger mt-1">{error.pic}</p>}
                             </div>
 
-                            {/* Active */}
                             <div className="col-md-6 mb-3">
-                                <label>Active *</label>
+                                <label className="fw-bold">Active</label>
                                 <select
                                     name="active"
                                     onChange={getInputData}
-                                    className="form-select border-3 border-primary"
+                                    className="form-select border-primary"
                                 >
                                     <option value="1">Yes</option>
                                     <option value="0">No</option>
@@ -182,19 +204,13 @@ export default function AdminCreateBlog() {
                             </div>
                         </div>
 
-                        {/* Blog Image */}
+                        {/* Submit Button */}
                         <div className="mb-3">
-                            <label>Blog Image *</label>
-                            <input
-                                type="file"
-                                name="pic"
-                                onChange={getInputData}
-                                className={`form-control border-3 ${show && error.pic ? "border-danger" : "border-primary"}`}
-                            />
-                            {show && error.pic && <p className="text-danger">{error.pic}</p>}
+                            <button type="submit" className="btn btn-primary w-100 text-light">
+                                <i className="fa fa-save"></i> Create Blog
+                            </button>
                         </div>
 
-                        <button className="btn btn-primary w-100">Create Blog</button>
                     </form>
                 </div>
             </div>

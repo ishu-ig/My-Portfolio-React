@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Link, useNavigate, useParams } from 'react-router-dom'
+import formValidator from "../../FormValidators/formValidator"
+import imageValidator from "../../FormValidators/imageValidator"
+import { updateCertificate, getCertificate } from '../../Redux/ActionCreators/CertificateActionCreators'
 
-
-import formValidator from '../../FormValidators/formValidator'
-import imageValidator from '../../FormValidators/imageValidator'
-
-import { getCertificate, updateCertificate } from "../../Redux/ActionCreartors/CertificateActionCreators"
 export default function AdminUpdateCertificate() {
-    let { _id } = useParams()  //in case of real backend
     // let { id } = useParams()
+
+    let {_id} = useParams()
+
     let [data, setData] = useState({
         name: "",
         pic: "",
@@ -24,19 +24,20 @@ export default function AdminUpdateCertificate() {
     let [show, setShow] = useState(false)
     let navigate = useNavigate()
 
+
     let CertificateStateData = useSelector(state => state.CertificateStateData)
     let dispatch = useDispatch()
 
     function getInputData(e) {
         let name = e.target.name
         let value = e.target.files ? e.target.files[0] : e.target.value  //in case of real backend
-        // let value = e.target.files ? "Certificate/" + e.target.files[0].name : e.target.value
+        // let value = e.target.files ? "Food_maincategory/" + e.target.files[0].name : e.target.value
 
         if (name !== "active") {
             setError((old) => {
                 return {
                     ...old,
-                    [name]: formValidator(e)
+                    [name]: e.target.files ? imageValidator(e) : formValidator(e)
                 }
             })
         }
@@ -53,17 +54,30 @@ export default function AdminUpdateCertificate() {
         if (errorItem)
             setShow(true)
         else {
-            // dispatch(updateCertificate({ ...data }))
+            let item = CertificateStateData.find(x => x._id !== _id && x.name.toLocaleLowerCase() === data.name.toLocaleLowerCase())  // in case of real backend
+            // let item = CertificateStateData.find(x => x.id !== id && x.name.toLocaleLowerCase() === data.name.toLocaleLowerCase())
+            if (item) {
+                setShow(true)
+                setError((old) => {
+                    return {
+                        ...old,
+                        "name": "Certificate Already Exist"
+                    }
+                })
+            }
+            else {
+                // dispatch(updateCertificate({ ...data }))
 
-            // //in case of real backend and form has a file field
-            let formData = new FormData()
-            formData.append("_id", data._id)  //use id in case of RDBMS and use _id in case of mongodb
-            formData.append("name", data.name)
-            formData.append("pic", data.pic)
-            formData.append("issuedBy", data.issuedBy)
-            formData.append("active", data.active)
-            dispatch(updateCertificate(formData))
-            navigate("/certificate")
+                //in case of real backend and form has a file field
+                let formData = new FormData()
+                formData.append("_id",data._id)
+                formData.append("name",data.name)
+                formData.append("pic",data.pic)
+                formData.append("active",data.active)
+                dispatch(updateCertificate(formData))
+
+                navigate("/maincategory")
+            }
         }
     }
 
@@ -72,7 +86,7 @@ export default function AdminUpdateCertificate() {
             dispatch(getCertificate())
             if (CertificateStateData.length) {
                 // let item = CertificateStateData.find(x => x.id === id)
-                let item = CertificateStateData.find(x => x._id === _id) //in case of real backend
+                let item = CertificateStateData.find(x => x._id === _id)
                 if (item)
                     setData({ ...item })
             }
@@ -81,40 +95,72 @@ export default function AdminUpdateCertificate() {
     return (
         <>
             <div className="container">
-                <h5 className="text-center text-light bg-primary p-2">Update Certificate <Link to="/Certificate"><i className="fa fa-arrow-left text-light float-end pt-1"></i></Link></h5>
+                <h5 className="text-center text-light bg-primary p-2">Update Certificate <Link to="/certificate"><i className="fa fa-arrow-left text-light float-end pt-1"></i></Link></h5>
                 {/* Form */}
                 <div className="card mt-3 shadow-sm p-4">
                     <form onSubmit={postSubmit}>
+                        {/* Name Field */}
                         <div className="mb-3">
-                            <label>Name</label>
-                            <input type="text" name="name" value={data.name} onChange={getInputData} placeholder='Certificate Name' className={`form-control border-3 ${show && error.name ? 'border-danger' : 'border-primary'}`} />
-                            {show && error.name ? <p className='text-danger text-capitalize'>{error.name}</p> : null}
+                            <label className="fw-bold">Name</label>
+                            <input
+                                type="text"
+                                name="name"
+                                onChange={getInputData}
+                                value={data.name}
+                                placeholder="Enter Maincategory Name"
+                                className={`form-control ${show && error.name ? 'border-danger' : 'border-primary'}`}
+                            />
+                            {show && error.name && <p className="text-danger mt-1">{error.name}</p>}
                         </div>
                         <div className="mb-3">
-                            <label>Issued By</label>
-                            <input type="text" name="issuedBy" value={data.issuedBy} onChange={getInputData} placeholder='Certificate Name' className={`form-control border-3 ${show && error.name ? 'border-danger' : 'border-primary'}`} />
-                            {show && error.name ? <p className='text-danger text-capitalize'>{error.name}</p> : null}
+                            <label className="fw-bold">Issued By</label>
+                            <input
+                                type="text"
+                                name="issuedBy "
+                                onChange={getInputData}
+                                value={data.issuedBy }
+                                placeholder="Enter Issued By"
+                                className={`form-control ${show && error.issuedBy ? 'border-danger' : 'border-primary'}`}
+                            />
+                            {show && error.issuedBy && <p className="text-danger mt-1">{error.issuedBy}</p>}
                         </div>
+
+                        {/* File Upload & Active Status */}
                         <div className="row">
+                            {/* File Upload */}
                             <div className="col-md-6 mb-3">
-                                <label>Pic</label>
-                                <input type="file" name="pic" onChange={getInputData} className={`form-control border-3 ${show && error.pic ? 'border-danger' : 'border-primary'}`} />
-                                {show && error.pic ? <p className='text-danger text-capitalize'>{error.pic}</p> : null}
+                                <label className="fw-bold">Upload Picture*</label>
+                                <input
+                                    type="file"
+                                    name="pic"
+                                    onChange={getInputData}
+                                    className={`form-control ${show && error.pic ? 'border-danger' : 'border-primary'}`}
+                                />
+                                {show && error.pic && <p className="text-danger mt-1">{error.pic}</p>}
                             </div>
+
+                            {/* Active Status */}
                             <div className="col-md-6 mb-3">
-                                <label>Active</label>
-                                <select name="active" value={data.active ? "1" : "0"} onChange={getInputData} className='form-select border-3 border-primary'>
+                                <label className="fw-bold">Active</label>
+                                <select
+                                    name="active"
+                                    value={data.active ? "1" : "0"}
+                                    onChange={getInputData}
+                                    className="form-select border-primary"
+                                >
                                     <option value="1">Yes</option>
                                     <option value="0">No</option>
                                 </select>
                             </div>
                         </div>
 
+                        {/* Submit Button */}
                         <div className="mb-3">
-                            <button type="submit" className='btn btn-primary w-100 text-light'>Update</button>
+                            <button type="submit" className="btn btn-primary w-100 text-light p-2">
+                                <i className="fa fa-save"></i> Update Category
+                            </button>
                         </div>
                     </form>
-
                 </div>
             </div>
         </>

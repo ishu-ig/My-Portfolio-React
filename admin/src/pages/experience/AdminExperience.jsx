@@ -1,173 +1,134 @@
-import React, { useEffect } from "react";
-import { Link } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import $ from "jquery";
-import "datatables.net-dt/css/dataTables.dataTables.min.css";
-import "datatables.net";
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 
-import {
-  deleteExperience,
-  getExperience,
-} from "../../Redux/ActionCreartors/ExperienceActionCreators";
+import $ from 'jquery';
+import 'datatables.net-dt/css/dataTables.dataTables.min.css';
+import 'datatables.net';
+
+import { deleteExperience, getExperience } from "../../Redux/ActionCreators/ExperienceActionCreators";
 
 export default function AdminExperience() {
-  const ExperienceStateData = useSelector(
-    (state) => state.ExperienceStateData
-  );
-  const dispatch = useDispatch();
 
-  // 🗑️ Delete Experience
-  const deleteRecord = (_id) => {
-    if (window.confirm("Are you sure you want to delete this experience record?")) {
-      dispatch(deleteExperience({ _id }));
-      getAPIData();
+    let ExperienceStateData = useSelector(state => state.ExperienceStateData);
+    let dispatch = useDispatch();
+    let [flag, setFlag] = useState(false);
+
+    function deleteRecord(_id) {
+        if (window.confirm("Are you sure you want to delete this experience?")) {
+            dispatch(deleteExperience({ _id }));
+            getAPIData();
+            setFlag(!flag);
+        }
     }
-  };
 
-  // 📊 Fetch & Initialize DataTable
-  const getAPIData = () => {
-    dispatch(getExperience());
-    const timer = setTimeout(() => {
-      if ($.fn.DataTable.isDataTable("#ExperienceTable")) {
-        $("#ExperienceTable").DataTable().destroy();
-      }
-      $("#ExperienceTable").DataTable({
-        responsive: true,
-        autoWidth: false,
-        pageLength: 8,
-        language: {
-          searchPlaceholder: "Search experience...",
-          search: "",
-        },
-      });
-    }, 400);
-    return timer;
-  };
+    function getAPIData() {
+        dispatch(getExperience());
 
-  // 🔁 Fetch on Mount
-  useEffect(() => {
-    const timer = getAPIData();
-    return () => clearTimeout(timer);
-  }, [ExperienceStateData.length]);
+        let time = setTimeout(() => {
+            if (!$.fn.DataTable.isDataTable('#DataTable')) {
+                $('#DataTable').DataTable();
+            }
+        }, 500);
 
-  return (
-    <div className="admin-skill-container p-3">
-      {/* 🔹 Header Section */}
-      <div className="d-flex flex-column flex-md-row justify-content-between align-items-center bg-primary text-light rounded p-3 shadow-sm">
-        <h5 className="mb-2 mb-md-0 fw-semibold text-light">
-          <i className="fa fa-briefcase me-2"></i> Experience Management
-        </h5>
-        <Link
-          to="/Experience/create"
-          className="btn btn-light text-primary fw-semibold shadow-sm"
-        >
-          <i className="fa fa-plus me-1"></i> Add Experience
-        </Link>
-      </div>
+        return time;
+    }
 
-      {/* 🔹 Table Section */}
-      <div className="table-responsive mt-4">
-        <table
-          id="ExperienceTable"
-          className="table table-striped table-bordered align-middle shadow-sm responsive-table"
-        >
-          <thead className="table-dark">
-            <tr>
-              <th>ID</th>
-              <th>Job Title</th>
-              <th>Company</th>
-              <th>Start</th>
-              <th>End</th>
-              <th>Description</th>
-              <th>Status</th>
-              <th className="text-center">Edit</th>
-              <th className="text-center">Delete</th>
-            </tr>
-          </thead>
+    useEffect(() => {
+        let time = getAPIData();
 
-          <tbody>
-            {ExperienceStateData.length > 0 ? (
-              ExperienceStateData.map((item, i) => (
-                <tr key={item._id || i}>
-                  
-                  {/* ID */}
-                  <td data-label="ID" className="text-muted small">
-                    {item._id}
-                  </td>
+        return () => {
+            clearTimeout(time);
+            if ($.fn.DataTable.isDataTable('#DataTable')) {
+                $('#DataTable').DataTable().destroy();
+            }
+        };
+    }, [ExperienceStateData.length]);
 
-                  {/* Job Title */}
-                  <td data-label="Job Title" className="fw-semibold text-primary">
-                    {item.jobTitle}
-                  </td>
+    return (
+        <div className="container-fluid">
 
-                  {/* Company */}
-                  <td data-label="Company">{item.companyName}</td>
+            {/* HEADER */}
+            <h5 className="text-center text-light bg-primary p-3">
+                Experience
+                <Link to="/experience/create">
+                    <i className="fa fa-plus text-light float-end"></i>
+                </Link>
+            </h5>
 
-                  {/* Start Date */}
-                  <td data-label="Start" className="text-center">
-                    {item.startDate}
-                  </td>
+            {/* TABLE */}
+            <div className="table-responsive mt-3">
+                <table id="DataTable" className="table table-striped table-hover table-bordered text-center">
 
-                  {/* End Date */}
-                  <td data-label="End" className="text-center">
-                    {item.endDate}
-                  </td>
+                    <thead className="text-light" style={{ backgroundColor: "#1F2A40" }}>
+                        <tr>
+                            <th>ID</th>
+                            <th>Job Title</th>
+                            <th>Company</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            <th>Description</th>
+                            <th>Status</th>
+                            <th>Update</th>
+                            {localStorage.getItem("role") === "Super Admin" ? <th>Delete</th> : ""}
+                        </tr>
+                    </thead>
 
-                  {/* Description */}
-                  <td
-                    data-label="Description"
-                    className="text-justified text-muted small "
-                  >
-                    <div className="description">
-                      {item.description || "—"}
-                    </div>
-                  </td>
+                    <tbody>
+                        {ExperienceStateData.map((item) => (
+                            <tr key={item._id}>
 
-                  {/* Status */}
-                  <td data-label="Status">
-                    <span
-                      className={`badge px-3 py-2 ${
-                        item.active ? "bg-success" : "bg-danger"
-                      }`}
-                    >
-                      {item.active ? "Active" : "Inactive"}
-                    </span>
-                  </td>
+                                <td>{item._id}</td>
 
-                  {/* ✏️ Edit */}
-                  <td data-label="Edit" className="text-center">
-                    <Link
-                      to={`/Experience/update/${item._id}`}
-                      className="table-action-btn edit"
-                      title="Edit Experience"
-                    >
-                      <i className="fa fa-edit"></i>
-                    </Link>
-                  </td>
+                                <td className="fw-bold text-primary">
+                                    {item.jobTitle}
+                                </td>
 
-                  {/* 🗑️ Delete */}
-                  <td data-label="Delete" className="text-center">
-                    <button
-                      className="table-action-btn delete"
-                      title="Delete Experience"
-                      onClick={() => deleteRecord(item._id)}
-                    >
-                      <i className="fa fa-trash"></i>
-                    </button>
-                  </td>
+                                <td>{item.companyName}</td>
 
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="9" className="text-center py-4 text-muted">
-                  <i className="fa fa-spinner fa-spin me-2"></i> Loading experience records...
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
+                                <td>{item.startDate}</td>
+
+                                <td>{item.endDate}</td>
+
+                                <td>
+                                    <div style={{ maxWidth: "250px" }}>
+                                        {item.description}
+                                    </div>
+                                </td>
+
+                                {/* STATUS */}
+                                <td className={item.active ? 'text-success fw-bold' : 'text-danger fw-bold'}>
+                                    {item.active ? "Active" : "Inactive"}
+                                </td>
+
+                                {/* UPDATE */}
+                                <td>
+                                    <Link to={`/experience/update/${item._id}`} className="btn btn-primary btn-sm">
+                                        <i className="fa fa-edit"></i>
+                                    </Link>
+                                </td>
+
+                                {/* DELETE */}
+                                {
+                                    localStorage.getItem("role") === "Super Admin" ?
+                                        <td>
+                                            <button
+                                                className="btn btn-danger btn-sm"
+                                                onClick={() => deleteRecord(item._id)}
+                                            >
+                                                <i className="fa fa-trash"></i>
+                                            </button>
+                                        </td>
+                                        : ""
+                                }
+
+                            </tr>
+                        ))}
+                    </tbody>
+
+                </table>
+            </div>
+
+        </div>
+    );
 }

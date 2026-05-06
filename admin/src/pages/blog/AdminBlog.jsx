@@ -1,169 +1,107 @@
-import React, { useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import $ from "jquery";
-import "datatables.net-dt/css/dataTables.dataTables.min.css";
-import "datatables.net";
-import {
-  deleteBlog,
-  getBlog,
-} from "../../Redux/ActionCreartors/BlogActionCreators";
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import $ from 'jquery';
+import 'datatables.net-dt/css/dataTables.dataTables.min.css';
+import 'datatables.net';
+
+import { deleteBlog, getBlog } from "../../Redux/ActionCreators/BlogActionCreators";
 
 export default function AdminBlog() {
-  const BlogStateData = useSelector((state) => state.BlogStateData);
-  const dispatch = useDispatch();
-  const tableRef = useRef(null);
+    let BlogStateData = useSelector(state => state.BlogStateData);
+    let dispatch = useDispatch();
+    let [flag, setFlag] = useState(false)
 
-  // 🧾 Fetch data
-  useEffect(() => {
-    dispatch(getBlog());
-  }, [dispatch]);
-
-  // ⚙️ Initialize DataTable safely
-  useEffect(() => {
-    if (BlogStateData.length > 0 && tableRef.current) {
-      if ($.fn.DataTable.isDataTable(tableRef.current)) {
-        $(tableRef.current).DataTable().destroy();
-      }
-
-      const timer = setTimeout(() => {
-        $(tableRef.current).DataTable({
-          responsive: true,
-          autoWidth: false,
-          pageLength: 8,
-          language: {
-            searchPlaceholder: "Search blog...",
-            search: "",
-          },
-          columnDefs: [
-            { orderable: false, targets: [7, 8] },
-            { targets: "_all", className: "align-middle" },
-          ],
-        });
-      }, 150);
-
-      return () => clearTimeout(timer);
+    function deleteRecord(_id) {
+        if (window.confirm("Are you sure you want to delete this blog?")) {
+            dispatch(deleteBlog({ _id: _id }));
+            getAPIData();
+            setFlag(!flag)
+        }
     }
-  }, [BlogStateData]);
 
-  // 🗑 Delete blog
-  const deleteRecord = (_id) => {
-    if (window.confirm("Are you sure you want to delete this blog?")) {
-      dispatch(deleteBlog({ _id }));
-      setTimeout(() => dispatch(getBlog()), 400);
+    function getAPIData() {
+        dispatch(getBlog());
+        let time = setTimeout(() => {
+            if (!$.fn.DataTable.isDataTable('#DataTable')) {
+                $('#DataTable').DataTable();
+            }
+        }, 500);
+        return time;
     }
-  };
 
-  return (
-    <>
-      <div className="admin-skill-container p-3">
-        {/* 🔹 Header */}
-        <div className="d-flex flex-column flex-md-row justify-content-between align-items-center bg-primary text-light rounded p-3 shadow-sm">
-          <h5 className="mb-2 mb-md-0 fw-semibold text-light">
-            <i className="fa fa-newspaper me-2"></i> Blog Management
-          </h5>
-          <Link
-            to="/blog/create"
-            className="btn btn-light text-primary fw-semibold shadow-sm"
-          >
-            <i className="fa fa-plus me-1"></i> Add Blog
-          </Link>
-        </div>
+    useEffect(() => {
+        let time = getAPIData();
+        return () => {
+            clearTimeout(time);
+            if ($.fn.DataTable.isDataTable('#DataTable')) {
+                $('#DataTable').DataTable().destroy();
+            }
+        };
+    }, [BlogStateData.length]);
 
-        {/* 🔹 Table */}
-        <div className="table-responsive mt-4">
-          <table
-            ref={tableRef}
-            id="BlogTable"
-            className="table table-striped table-bordered align-middle shadow-sm responsive-table"
-          >
-            <thead className="table-dark">
-              <tr>
-                <th>ID</th>
-                <th>Title</th>
-                <th>Thumbnail</th>
-                <th>Category</th>
-                <th style={{ textAlign: "center" }}>Author</th>
-                <th className="text-center">Short Description</th>
-                <th>Date</th>
-                <th className="text-center">Edit</th>
-                <th className="text-center">Delete</th>
-              </tr>
-            </thead>
+    return (
+        <>
+            <div className="container-fluid">
+                {/* Header */}
+                <h5 className="text-center text-light bg-primary p-3">
+                    Blog{' '}
+                    <Link to="/blog/create"><i className="fa fa-plus text-light float-end pt-1"></i></Link>
+                </h5>
 
-            <tbody>
-              {BlogStateData.length > 0 ? (
-                BlogStateData.map((item, i) => (
-                  <tr key={item._id || i}>
-                    <td data-label="ID" className="text-muted small">
-                      {item._id}
-                    </td>
-
-                    <td data-label="Title" className="fw-semibold">
-                      {item.title}
-                    </td>
-
-                    <td data-label="Thumbnail">
-                      <Link
-                        to={`${process.env.REACT_APP_BACKEND_SERVER}/${item.pic}`}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        <img
-                          src={`${process.env.REACT_APP_BACKEND_SERVER}/${item.pic}`}
-                          alt={item.title}
-                          className="rounded shadow-sm"
-                        />
-                      </Link>
-                    </td>
-
-                    <td data-label="Category">{item.category}</td>
-
-                    <td data-label="Author" className="text-center">
-                      {item.author}
-                    </td>
-
-                    <td data-label="Short Description">
-                      <div className="description">
-                        {item.shortDescription || "—"}
-                      </div>
-                    </td>
-
-                    <td data-label="Date">{item.date}</td>
-
-                    <td data-label="Edit" className="text-center">
-                      <Link
-                        to={`/blog/update/${item._id}`}
-                        className="table-action-btn edit"
-                        title="Edit Blog"
-                      >
-                        <i className="fa fa-edit"></i>
-                      </Link>
-                    </td>
-
-                    <td data-label="Delete" className="text-center">
-                      <button
-                        className="table-action-btn delete"
-                        title="Delete Blog"
-                        onClick={() => deleteRecord(item._id)}
-                      >
-                        <i className="fa fa-trash"></i>
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="9" className="text-center py-4 text-muted">
-                    <i className="fa fa-spinner fa-spin me-2"></i> Loading
-                    blog records...
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </>
-  );
+                {/* Table */}
+                <div className="table-responsive mt-3">
+                    <table id="DataTable" className="table table-striped table-hover table-bordered text-center">
+                        <thead className="text-light" style={{ backgroundColor: "#1F2A40" }}>
+                            <tr>
+                                <th>Id</th>
+                                <th>Title</th>
+                                <th>Thumbnail</th>
+                                <th>Category</th>
+                                <th>Author</th>
+                                <th>Date</th>
+                                <th>Tags</th>
+                                <th>Active</th>
+                                <th>Update</th>
+                                {localStorage.getItem("role") === "Super Admin" ? <th>Delete</th> : ""}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {BlogStateData.map((item) => (
+                                <tr key={item._id}>
+                                    <td>{item._id}</td>
+                                    <td>{item.title}</td>
+                                    <td>
+                                        <Link to={`${process.env.REACT_APP_BACKEND_SERVER}/${item.pic}`} target='_blank' rel='noreferrer'>
+                                            <img src={`${process.env.REACT_APP_BACKEND_SERVER}/${item.pic}`} height={50} width={80} className="rounded shadow-sm" alt="" />
+                                        </Link>
+                                    </td>
+                                    <td>{item.category}</td>
+                                    <td>{item.author}</td>
+                                    <td>{item.date}</td>
+                                    <td>{item.tags}</td>
+                                    <td className={item.active ? 'text-success fw-bold' : 'text-danger fw-bold'}>
+                                        {item.active ? "Yes" : "No"}
+                                    </td>
+                                    <td>
+                                        <Link to={`/blog/update/${item._id}`} className="btn btn-primary text-light btn-sm">
+                                            <i className="fa fa-edit fs-5"></i>
+                                        </Link>
+                                    </td>
+                                    {
+                                        localStorage.getItem("role") === "Super Admin" ?
+                                            <td>
+                                                <button className="btn btn-danger btn-sm" onClick={() => deleteRecord(item._id)}>
+                                                    <i className="fa fa-trash fs-5"></i>
+                                                </button>
+                                            </td> : ""
+                                    }
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </>
+    );
 }

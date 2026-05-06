@@ -1,45 +1,41 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import { Link, useNavigate } from 'react-router-dom'
-import { useDispatch, } from 'react-redux'
-
-import formValidator from '../../FormValidators/formValidator'
-import imageValidator from '../../FormValidators/imageValidator'
-
-import { createPortfolio } from "../../Redux/ActionCreartors/PortfolioActionCreators"
-
-var rte
+import formValidator from "../../FormValidators/formValidator"
+import imageValidator from "../../FormValidators/imageValidator"
+import { createPortfolio, getPortfolio } from '../../Redux/ActionCreators/PortfolioActionCreators'
 
 export default function AdminCreatePortfolio() {
-    var refdiv = useRef(null);
-
     let [data, setData] = useState({
         name: "",
-        shortDescription:"",
-        longDescription:"",
-        tech:"",
-        category:"",
-        liveUrl:"",
-        githubRepo:"",
-        pic: [],
+        pic: "",
+        shortDescription: "",
+        longDescription: "",
+        category: "",
+        tech: "",
+        liveUrl: "",
+        githubRepo: "",
         active: true
     })
     let [error, setError] = useState({
-        name: "Name Field is Mendatory",
-        shortDescription: "Short Description Field is Mendatory",
-        category: "Category Field is Mendatory",
-        tech: "Technology Field is Mendatory",
-        pic: "Pic Field is Mendatory"
+        name: "Name Field is Mandatory",
+        pic: "Pic Field is Mandatory",
+        shortDescription: "Short Description Field is Mandatory",
+        longDescription: "Long Description Field is Mandatory",
+        category: "Category Field is Mandatory",
+        tech: "Tech Field is Mandatory"
     })
     let [show, setShow] = useState(false)
     let navigate = useNavigate()
+
+    let PortfolioStateData = useSelector(state => state.PortfolioStateData)
     let dispatch = useDispatch()
 
     function getInputData(e) {
         let name = e.target.name
-        let value = e.target.files ? e.target.files[0] : e.target.value  //in case of real backend
-        // let value = e.target.files ? Array.from(e.target.files).map(x => "Portfolio/" + x.name) : e.target.value
+        let value = e.target.files ? e.target.files[0] : e.target.value
 
-        if (name !== "active") {
+        if (name !== "active" && name !== "liveUrl" && name !== "githubRepo") {
             setError((old) => {
                 return {
                     ...old,
@@ -54,121 +50,182 @@ export default function AdminCreatePortfolio() {
             }
         })
     }
+
     function postSubmit(e) {
-        console.log("Enter post function")
         e.preventDefault()
         let errorItem = Object.values(error).find(x => x !== "")
         if (errorItem)
-        {
-            console.log(errorItem)
             setShow(true)
-        console.log(show)
-        }
         else {
-            console.log("enter else")
-            
-            // dispatch(createPortfolio({
-            //     ...data,
-            //     'maincategory': data.maincategory ? data.maincategory : MaincategoryStateData[0].name,
-            //     'subcategory': data.subcategory ? data.subcategory : SubcategoryStateData[0].name,
-            //     'brand': data.brand ? data.brand : BrandStateData[0].name,
-            //     'basePrice': bp,
-            //     'discount': d,
-            //     'finalPrice': fp,
-            //     'stockQuantity': stockQuantity,
-            //     'description': rte.getHTMLCode()
-            // }))
-
-            // //in case of real backend and form has a file field
-            let formData = new FormData()
-            formData.append("name", data.name)
-            formData.append("shortDescription", data.shortDescription)
-            formData.append("category", data.category)
-            formData.append("tech", data.tech)
-            formData.append("liveUrl", data.liveUrl)
-            formData.append("githubRepo", data.githubRepo)
-            formData.append("pic", data.pic)
-            formData.append("longDescription", rte.getHTMLCode())
-            formData.append("active", data.active)
-            console.log(formData)
-            dispatch(createPortfolio(formData))
-
-            navigate("/portfolio")
+            let item = PortfolioStateData.find(x => x.name.toLocaleLowerCase() === data.name.toLocaleLowerCase())
+            if (item) {
+                setShow(true)
+                setError((old) => {
+                    return {
+                        ...old,
+                        "name": "Portfolio Already Exist"
+                    }
+                })
+            }
+            else {
+                let formData = new FormData()
+                formData.append("name", data.name)
+                formData.append("pic", data.pic)
+                formData.append("shortDescription", data.shortDescription)
+                formData.append("longDescription", data.longDescription)
+                formData.append("category", data.category)
+                formData.append("tech", data.tech)
+                formData.append("liveUrl", data.liveUrl)
+                formData.append("githubRepo", data.githubRepo)
+                formData.append("active", data.active)
+                dispatch(createPortfolio(formData))
+                navigate("/portfolio")
+            }
         }
     }
 
     useEffect(() => {
-        rte = new window.RichTextEditor(refdiv.current);
-        rte.setHTMLCode("");
-    }, [])
+        (() => {
+            dispatch(getPortfolio())
+        })()
+    }, [PortfolioStateData.length])
+
     return (
         <>
-            <div>
-                <h5 className='bg-primary text-light text-center p-2'>Portfolio <Link to="/portfolio"><i className='fa fa-arrow-left text-light float-end'></i></Link></h5>
+            <div className="container">
+                <h5 className="text-center text-light bg-primary p-2">
+                    Create Portfolio{' '}
+                    <Link to="/portfolio"><i className="fa fa-arrow-left text-light float-end pt-1"></i></Link>
+                </h5>
+
                 <div className="card mt-3 shadow-sm p-4">
-                <form onSubmit={postSubmit}>
-                    <div className="mb-3">
-                        <label>Portfolio Name*</label>
-                        <input type="text" name="name" onChange={getInputData} placeholder='Portfolio Name' className={`form-control border-3 ${show && error.name ? 'border-danger' : 'border-primary'}`} />
-                        {show && error.name ? <p className='text-danger text-capitalize'>{error.name}</p> : null}
-                    </div>
+                    <form onSubmit={postSubmit}>
 
-                    <div className='mb-3'>
-                        <label>Short Description</label>
-                        <textarea name="shortDescription" placeholder='Short Description........' onChange={getInputData} className={`form-control border-3 ${show && error.shortDescription ? 'border-danger' : 'border-primary'}`} id=""></textarea>
-                        {show && error.shortDescription ? <p className='text-danger text-capitalize'>{error.shortDescription}</p> : null}
-                    </div>
-                    <div className="mb-3">
-                        <label>Description*</label>
-                        <div ref={refdiv} className='border-3 border-primary'></div>
-                    </div>
+                        {/* Name */}
+                        <div className="mb-3">
+                            <label className="fw-bold">Name*</label>
+                            <input
+                                type="text"
+                                name="name"
+                                onChange={getInputData}
+                                placeholder="Enter Portfolio Name"
+                                className={`form-control ${show && error.name ? 'border-danger' : 'border-primary'}`}
+                            />
+                            {show && error.name && <p className="text-danger mt-1">{error.name}</p>}
+                        </div>
 
-                    <div className="row">
-                        <div className="col-md-6 mb-3">
-                            <label>Category*</label>
-                            <input type="text" name="category" onChange={getInputData} placeholder='Portfolio Category' className={`form-control border-3 ${show && error.category ? 'border-danger' : 'border-primary'}`} />
-                            {show && error.category ? <p className='text-danger text-capitalize'>{error.category}</p> : null}
+                        {/* Short Description */}
+                        <div className="mb-3">
+                            <label className="fw-bold">Short Description*</label>
+                            <input
+                                type="text"
+                                name="shortDescription"
+                                onChange={getInputData}
+                                placeholder="Enter Short Description"
+                                className={`form-control ${show && error.shortDescription ? 'border-danger' : 'border-primary'}`}
+                            />
+                            {show && error.shortDescription && <p className="text-danger mt-1">{error.shortDescription}</p>}
                         </div>
-                        <div className="col-md-6 mb-3">
-                            <label>Technology*</label>
-                            <input type="text" name="tech" onChange={getInputData} placeholder='Technology Used' className={`form-control border-3 ${show && error.tech ? 'border-danger' : 'border-primary'}`} />
-                            {show && error.tech ? <p className='text-danger text-capitalize'>{error.tech}</p> : null}
-                        </div>
-                    </div>
 
-                    <div className="row">
-                        <div className="col-md-6 mb-3">
-                            <label>Live URL*</label>
-                            <input type="url" name="liveUrl" onChange={getInputData} placeholder='Live Url' className={`form-control border-3 border-primary`} />
+                        {/* Long Description */}
+                        <div className="mb-3">
+                            <label className="fw-bold">Long Description*</label>
+                            <textarea
+                                name="longDescription"
+                                onChange={getInputData}
+                                placeholder="Enter Long Description"
+                                rows={4}
+                                className={`form-control ${show && error.longDescription ? 'border-danger' : 'border-primary'}`}
+                            />
+                            {show && error.longDescription && <p className="text-danger mt-1">{error.longDescription}</p>}
                         </div>
-                        <div className="col-md-6 mb-3">
-                            <label>Github URL*</label>
-                            <input type="url" name="githubRepo" onChange={getInputData} placeholder='Github Repo Url' className={`form-control border-3 border-primary`} />
-                            
-                        </div>
-                    </div>
-                    
 
+                        {/* Category & Tech */}
+                        <div className="row">
+                            <div className="col-md-6 mb-3">
+                                <label className="fw-bold">Category*</label>
+                                <input
+                                    type="text"
+                                    name="category"
+                                    onChange={getInputData}
+                                    placeholder="Enter Category"
+                                    className={`form-control ${show && error.category ? 'border-danger' : 'border-primary'}`}
+                                />
+                                {show && error.category && <p className="text-danger mt-1">{error.category}</p>}
+                            </div>
 
-                    <div className="row">
-                    <div className="col-md-6 mb-3">
-                            <label>Pic*</label>
-                            <input type="file" name="pic" onChange={getInputData} className={`form-control border-3 ${show && error.pic ? 'border-danger' : 'border-primary'}`} />
-                            {show && error.pic ? <p className='text-danger text-capitalize'>{error.pic}</p> : null}
-                                
+                            <div className="col-md-6 mb-3">
+                                <label className="fw-bold">Tech*</label>
+                                <input
+                                    type="text"
+                                    name="tech"
+                                    onChange={getInputData}
+                                    placeholder="Enter Tech Stack"
+                                    className={`form-control ${show && error.tech ? 'border-danger' : 'border-primary'}`}
+                                />
+                                {show && error.tech && <p className="text-danger mt-1">{error.tech}</p>}
+                            </div>
                         </div>
-                        <div className="col-md-6 mb-3">
-                            <label>Active*</label>
-                            <select name="active" onChange={getInputData} className='form-select border-3 border-primary'>
-                                <option value="1">Yes</option>
-                                <option value="0">No</option>
-                            </select>
+
+                        {/* Live URL & GitHub Repo */}
+                        <div className="row">
+                            <div className="col-md-6 mb-3">
+                                <label className="fw-bold">Live URL</label>
+                                <input
+                                    type="text"
+                                    name="liveUrl"
+                                    onChange={getInputData}
+                                    placeholder="Enter Live URL (optional)"
+                                    className="form-control border-primary"
+                                />
+                            </div>
+
+                            <div className="col-md-6 mb-3">
+                                <label className="fw-bold">GitHub Repo</label>
+                                <input
+                                    type="text"
+                                    name="githubRepo"
+                                    onChange={getInputData}
+                                    placeholder="Enter GitHub Repo URL (optional)"
+                                    className="form-control border-primary"
+                                />
+                            </div>
                         </div>
-                    </div>
-                    <div className="mb-3">
-                        <button type="submit" className='btn btn-primary w-100 text-light'>Create</button>
-                    </div>
-                </form>
+
+                        {/* Pic Upload & Active */}
+                        <div className="row">
+                            <div className="col-md-6 mb-3">
+                                <label className="fw-bold">Upload Picture*</label>
+                                <input
+                                    type="file"
+                                    name="pic"
+                                    onChange={getInputData}
+                                    className={`form-control ${show && error.pic ? 'border-danger' : 'border-primary'}`}
+                                />
+                                {show && error.pic && <p className="text-danger mt-1">{error.pic}</p>}
+                            </div>
+
+                            <div className="col-md-6 mb-3">
+                                <label className="fw-bold">Active</label>
+                                <select
+                                    name="active"
+                                    onChange={getInputData}
+                                    className="form-select border-primary"
+                                >
+                                    <option value="1">Yes</option>
+                                    <option value="0">No</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        {/* Submit Button */}
+                        <div className="mb-3">
+                            <button type="submit" className="btn btn-primary w-100 text-light">
+                                <i className="fa fa-save"></i> Create Portfolio
+                            </button>
+                        </div>
+
+                    </form>
                 </div>
             </div>
         </>

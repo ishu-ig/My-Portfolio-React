@@ -8,7 +8,9 @@ import portfolioSagas from "./PortfolioSagas"
 import skillSagas from "./SkillSagas"
 import testimonialSagas from "./TestimonialSagas"
 import blogSagas from "./BlogSagas"
+import resumeSagas from "./ResumeSagas"
 import newsletterSagas from "./NewsletterSagas"
+import commentSagas from "./CommentSagas"
 
 
 export default function* RootSaga() {
@@ -22,6 +24,8 @@ export default function* RootSaga() {
         skillSagas(),
         testimonialSagas(),
         blogSagas(),
-        newsletterSagas()
+        resumeSagas(),
+        newsletterSagas(),
+        commentSagas()
     ])
 }

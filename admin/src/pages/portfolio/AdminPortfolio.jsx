@@ -1,192 +1,150 @@
-import React, { useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import $ from "jquery";
-import "datatables.net-dt/css/dataTables.dataTables.min.css";
-import "datatables.net";
-import {
-  deletePortfolio,
-  getPortfolio,
-} from "../../Redux/ActionCreartors/PortfolioActionCreators";
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+
+import $ from 'jquery';
+import 'datatables.net-dt/css/dataTables.dataTables.min.css';
+import 'datatables.net';
+
+import { deletePortfolio, getPortfolio } from "../../Redux/ActionCreators/PortfolioActionCreators";
 
 export default function AdminPortfolio() {
-  const PortfolioStateData = useSelector((state) => state.PortfolioStateData);
-  const dispatch = useDispatch();
-  const tableRef = useRef(null);
 
-  // 🧾 Fetch data
-  useEffect(() => {
-    dispatch(getPortfolio());
-  }, [dispatch]);
+    let PortfolioStateData = useSelector(state => state.PortfolioStateData);
+    let dispatch = useDispatch();
+    let [flag, setFlag] = useState(false);
 
-  // ⚙️ Initialize DataTable safely
-  useEffect(() => {
-    if (PortfolioStateData.length > 0 && tableRef.current) {
-      if ($.fn.DataTable.isDataTable(tableRef.current)) {
-        $(tableRef.current).DataTable().destroy();
-      }
-
-      const timer = setTimeout(() => {
-        $(tableRef.current).DataTable({
-          responsive: true,
-          autoWidth: false,
-          pageLength: 8,
-          language: {
-            searchPlaceholder: "Search portfolio...",
-            search: "",
-          },
-          columnDefs: [
-            { orderable: false, targets: [9, 10] },
-            { targets: "_all", className: "align-middle" },
-          ],
-        });
-      }, 150);
-
-      return () => clearTimeout(timer);
+    function deleteRecord(_id) {
+        if (window.confirm("Are you sure you want to delete this Portfolio?")) {
+            dispatch(deletePortfolio({ _id }));
+            getAPIData();
+            setFlag(!flag);
+        }
     }
-  }, [PortfolioStateData]);
 
-  // 🗑 Delete portfolio
-  const deleteRecord = (_id) => {
-    if (window.confirm("Are you sure you want to delete this portfolio?")) {
-      dispatch(deletePortfolio({ _id }));
-      setTimeout(() => dispatch(getPortfolio()), 400);
+    function getAPIData() {
+        dispatch(getPortfolio());
+
+        let time = setTimeout(() => {
+            if (!$.fn.DataTable.isDataTable('#DataTable')) {
+                $('#DataTable').DataTable();
+            }
+        }, 500);
+
+        return time;
     }
-  };
 
-  return (
-    <>
-      <div className="admin-skill-container p-3">
-        {/* 🔹 Header */}
-        <div className="d-flex flex-column flex-md-row justify-content-between align-items-center bg-primary text-light rounded p-3 shadow-sm">
-          <h5 className="mb-2 mb-md-0 fw-semibold text-light">
-            <i className="fa fa-folder-open me-2"></i> Portfolio Management
-          </h5>
-          <Link
-            to="/portfolio/create"
-            className="btn btn-light text-primary fw-semibold shadow-sm"
-          >
-            <i className="fa fa-plus me-1"></i> Add Project
-          </Link>
-        </div>
+    useEffect(() => {
+        let time = getAPIData();
 
-        {/* 🔹 Table */}
-        <div className="table-responsive mt-4">
-          <table
-            ref={tableRef}
-            id="PortfolioTable"
-            className="table table-striped table-bordered align-middle shadow-sm responsive-table newsletter-table"
-          >
-            <thead className="table-dark">
-              <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Image</th>
-                <th>Category</th>
-                <th >Tech</th>
-                <th >Short Description</th>
-                <th>Live URL</th>
-                <th>Github</th>
-                <th>Status</th>
-                <th >Edit</th>
-                <th >Delete</th>
-              </tr>
-            </thead>
-            <tbody>
-              {PortfolioStateData.length > 0 ? (
-                PortfolioStateData.map((item, i) => (
-                  <tr key={item._id || i}>
-                    <td data-label="ID" className="text-muted small">
-                      {item._id}
-                    </td>
-                    <td data-label="Name" className="fw-semibold">
-                      {item.name}
-                    </td>
-                    <td data-label="Image">
-                      <Link
-                        to={`${process.env.REACT_APP_BACKEND_SERVER}/${item.pic}`}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        <img
-                          src={`${process.env.REACT_APP_BACKEND_SERVER}/${item.pic}`}
-                          alt={item.name}
-                          className="rounded shadow-sm"
-                        />
-                      </Link>
-                    </td>
-                    <td data-label="Category">{item.category}</td>
-                    <td data-label="Tech">
-                      <div className="description">
-                        {item.tech}
-                      </div>
-                    </td>
-                    <td data-label="Short Description">
-                      <div className="text-center">
-                        {item.shortDescription || "—"}
-                      </div>
-                    </td>
-                    <td data-label="Live URL">
-                      <a
-                        href={item.liveUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-primary text-decoration-underline"
-                      >
-                        {item.liveUrl ? "Live" : "—"}
-                      </a>
-                    </td>
-                    <td data-label="Github">
-                      <a
-                        href={item.githubRepo}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-dark text-decoration-underline"
-                      >
-                        {item.githubRepo ? "Repo" : "—"}
-                      </a>
-                    </td>
-                    <td data-label="Status">
-                      <span
-                        className={`badge px-3 py-2 ${
-                          item.active ? "bg-success" : "bg-danger"
-                        }`}
-                      >
-                        {item.active ? "Active" : "Inactive"}
-                      </span>
-                    </td>
-                    <td data-label="Edit" className="text-center">
-                      <Link
-                        to={`/portfolio/update/${item._id}`}
-                        className="table-action-btn edit"
-                        title="Edit Portfolio"
-                      >
-                        <i className="fa fa-edit"></i>
-                      </Link>
-                    </td>
-                    <td data-label="Delete" className="text-center">
-                      <button
-                        className="table-action-btn delete"
-                        title="Delete Portfolio"
-                        onClick={() => deleteRecord(item._id)}
-                      >
-                        <i className="fa fa-trash"></i>
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="11" className="text-center py-4 text-muted">
-                    <i className="fa fa-spinner fa-spin me-2"></i> Loading
-                    portfolio records...
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+        return () => {
+            clearTimeout(time);
+            if ($.fn.DataTable.isDataTable('#DataTable')) {
+                $('#DataTable').DataTable().destroy();
+            }
+        };
+    }, [PortfolioStateData.length]);
+
+    return (
+        <div className="container-fluid">
+
+            {/* HEADER */}
+            <h5 className="text-center text-light bg-primary p-3">
+                Portfolio
+                <Link to="/portfolio/create">
+                    <i className="fa fa-plus text-light float-end"></i>
+                </Link>
+            </h5>
+
+            {/* TABLE */}
+            <div className="table-responsive mt-3">
+                <table id="DataTable" className="table table-striped table-hover table-bordered text-center">
+
+                    <thead className="text-light" style={{ backgroundColor: "#1F2A40" }}>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Image</th>
+                            <th>Category</th>
+                            <th>Tech</th>
+                            <th>Live</th>
+                            <th>Github</th>
+                            <th>Status</th>
+                            <th>Update</th>
+                            {localStorage.getItem("role") === "Super Admin" ? <th>Delete</th> : ""}
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {PortfolioStateData.map((item) => (
+                            <tr key={item._id}>
+
+                                <td>{item._id}</td>
+
+                                <td className="fw-bold">{item.name}</td>
+
+                                {/* IMAGE */}
+                                <td>
+                                    <Link to={`${process.env.REACT_APP_BACKEND_SERVER}/${item.pic}`} target="_blank" rel="noreferrer">
+                                        <img
+                                            src={`${process.env.REACT_APP_BACKEND_SERVER}/${item.pic}`}
+                                            height={50}
+                                            width={80}
+                                            className="rounded shadow-sm"
+                                            alt=""
+                                        />
+                                    </Link>
+                                </td>
+
+                                <td>{item.category}</td>
+                                <td>{item.tech}</td>
+
+                                {/* LIVE URL */}
+                                <td>
+                                    {item.liveUrl ?
+                                        <a href={item.liveUrl} target="_blank" rel="noreferrer" className="btn btn-success btn-sm">
+                                            Live
+                                        </a> : "N/A"}
+                                </td>
+
+                                {/* GITHUB */}
+                                <td>
+                                    {item.githubRepo ?
+                                        <a href={item.githubRepo} target="_blank" rel="noreferrer" className="btn btn-dark btn-sm">
+                                            Code
+                                        </a> : "N/A"}
+                                </td>
+
+                                {/* STATUS */}
+                                <td className={item.active ? "text-success fw-bold" : "text-danger fw-bold"}>
+                                    {item.active ? "Active" : "Inactive"}
+                                </td>
+
+                                {/* UPDATE */}
+                                <td>
+                                    <Link to={`/portfolio/update/${item._id}`} className="btn btn-primary btn-sm">
+                                        <i className="fa fa-edit"></i>
+                                    </Link>
+                                </td>
+
+                                {/* DELETE */}
+                                {
+                                    localStorage.getItem("role") === "Super Admin" ?
+                                        <td>
+                                            <button className="btn btn-danger btn-sm" onClick={() => deleteRecord(item._id)}>
+                                                <i className="fa fa-trash"></i>
+                                            </button>
+                                        </td>
+                                        : ""
+                                }
+
+                            </tr>
+                        ))}
+                    </tbody>
+
+                </table>
+            </div>
+
         </div>
-      </div>
-    </>
-  );
+    );
 }

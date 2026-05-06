@@ -1,218 +1,208 @@
-import React, { useEffect, useState } from "react";
-import { BrowserRouter, Route, Routes, useLocation, useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from 'react';
+import { BrowserRouter, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 
-// 🧭 Layout Components
-import AdminSidebar from "./Components/Sidebar";
-import AdminNavbar from "./Components/Navbar";
-import Footer from "./Components/Footer";
+// Layout
+import AdminSidebar from './Component/Sidebar';
+import AdminNavbar from './Component/Navbar';
+import Footer from './Component/Footer';
 
-// 🔐 Auth Pages
-import Home from "./pages/Home";
-import LoginPage from "./pages/LoginPage";
-import ForgetPasswordPage1 from "./pages/ForgetPasswordPage1";
-import ForgetPasswordPage2 from "./pages/ForgetPasswordPage2";
-import ForgetPasswordPage3 from "./pages/ForgetPasswordPage3";
+// Auth Pages
+import LoginPage from './pages/LoginPage';
+import ForgetPasswordPage1 from './pages/ForgetPasswordPage1';
+import ForgetPasswordPage2 from './pages/ForgetPasswordPage2';
+import ForgetPasswordPage3 from './pages/ForgetPasswordPage3';
 
-// 🧩 Skill Management
-import AdminSkill from "./pages/skill/AdminSkil";
-import AdminCreateSkill from "./pages/skill/AdminCreateSkill";
-import AdminUpdateSkill from "./pages/skill/AdminUpdateSkill";
+// Main Pages
+import Home from './pages/Home';
+import ProfilePage from './pages/ProfilePage';
+import UpdateProfilePage from './pages/UpdateProfilePage';
 
-// // 🧩 Service Management
-import AdminService from "./pages/service/AdminService";
-import AdminCreateService from "./pages/service/AdminCreateService";
-import AdminUpdateService from "./pages/service/AdminUpdateService";
+// Skill
+import AdminSkill from './pages/skill/AdminSkill';
+import AdminCreateSkill from './pages/skill/AdminCreateSkill';
+import AdminUpdateSkill from './pages/skill/AdminUpdateSkill';
 
-// // 🧩 Experience Management
-import AdminExperience from "./pages/experience/AdminExperience";
-import AdminCreateExperience from "./pages/experience/AdminCreateExperience";
-import AdminUpdateExperience from "./pages/experience/AdminUpdateExperience";
+// Certificate
+import AdminCertificate from './pages/certificate/AdminCertificate';
+import AdminCreateCertificate from './pages/certificate/AdminCreateCertificate';
+import AdminUpdateCertificate from './pages/certificate/AdminUpdateCertificate';
 
-// // 🧩 Certificate Management
-import AdminCertificate from "./pages/certificate/AdminCertificate";
-import AdminCreateCertificate from "./pages/certificate/AdminCreateCertificate";
-import AdminUpdateCertificate from "./pages/certificate/AdminUpdateCertificate";
+// Education
+import AdminEducation from './pages/education/AdminEducation';
+import AdminCreateEducation from './pages/education/AdminCreateEducation';
+import AdminUpdateEducation from './pages/education/AdminUpdateEducation';
 
-// // 🧩 Portfolio Management
-import AdminPortfolio from "./pages/portfolio/AdminPortfolio";
-import AdminCreatePortfolio from "./pages/portfolio/AdminCreatePortfolio";
-import AdminUpdatePortfolio from "./pages/portfolio/AdminUpdatePortfolio";
+// Experience
+import AdminExperience from './pages/experience/AdminExperience';
+import AdminCreateExperience from './pages/experience/AdminCreateExperience';
+import AdminUpdateExperience from './pages/experience/AdminUpdateExperience';
 
-// 🧩 Education Management
-import AdminEducation from "./pages/education/AdminEducation";
-import AdminCreateEducation from "./pages/education/AdminCreateEducation";
-import AdminUpdateEducation from "./pages/education/AdminUpdateEducation";
+// Testimonial
+import AdminTestimonial from './pages/testimonial/AdminTestimonial';
+import AdminCreateTestimonial from './pages/testimonial/AdminCreateTestimonial';
+import AdminUpdateTestimonial from './pages/testimonial/AdminUpdateTestimonial';
 
-// // 🧩 Testimonial Management
-import AdminTestimonial from "./pages/testimonial/AdminTestimonial";
-import AdminCreateTestimonial from "./pages/testimonial/AdminCreateTestimonial";
-import AdminUpdateTestimonial from "./pages/testimonial/AdminUpdateTestimonial";
+// BLOG ✅ (FIXED)
+import AdminBlog from './pages/blog/AdminBlog';
+import AdminCreateBlog from './pages/blog/AdminCreateBlog';
+import AdminUpdateBlog from './pages/blog/AdminUpdateBlog';
 
-// // 👥 User Management
-import AdminUser from "./pages/user/AdminUser";
-import AdminCreateUser from "./pages/user/AdminCreateUser";
-import AdminUpdateUser from "./pages/user/AdminUpdateUser";
+// Newsletter
+import AdminNewsletter from './pages/newsletter/AdminNewsletter';
 
-// // 📞 Contact Us Management
-import AdminContactUs from "./pages/contactus/AdminContactUs";
-import AdminContactUsShow from "./pages/contactus/AdminContactUsShow";
 
-// // 👤 Profile Pages
-import ProfilePage from "./pages/ProfilePage";
-import UpdateProfilePage from "./pages/UpdateProfilePage";
-import AdminBlog from "./pages/blog/AdminBlog";
-import AdminCreateBlog from "./pages/blog/AdminCreateBlog";
-import AdminUpdateBlog from "./pages/blog/AdminUpdateBlog";
+// User
+import AdminUser from './pages/user/AdminUser';
+import AdminCreateUser from './pages/user/AdminCreateUser';
+import AdminUpdateUser from './pages/user/AdminUpdateUser';
 
-import AdminNewsletter from "./pages/newsletter/AdminNewsletter"
+// Contact
+import AdminContactUs from './pages/contactUs/AdminContactUs';
+import AdminContactUsShow from './pages/contactUs/AdminShowContactUs';
 
-// ======================
-// 🌟 MAIN APP COMPONENT
-// ======================
+// Extra
+import AdminCreateService from './pages/service/AdminCreateService';
+import AdminUpdateService from './pages/service/AdminUpdateService';
+import AdminService from './pages/service/AdminService';
+import AdminPortfolio from './pages/portfolio/AdminPortfolio';
+import AdminCreatePortfolio from './pages/portfolio/AdminCreatePortfolio';
+import AdminUpdatePortfolio from './pages/portfolio/AdminUpdatePortfolio';
+
 export default function App() {
-  const [isSidebarExpanded, setIsSidebarExpanded] = useState(window.innerWidth > 992);
+    const [isSidebarExpanded, setIsSidebarExpanded] = useState(window.innerWidth > 992);
 
-  // Check login status
-  const checkLoginStatus = () => localStorage.getItem("login") === "true";
+    const checkLoginStatus = () => {
+        return localStorage.getItem("login") === "true";
+    };
 
-  useEffect(() => {
-    const handleResize = () => setIsSidebarExpanded(window.innerWidth > 992);
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+    useEffect(() => {
+        const handleResize = () => {
+            setIsSidebarExpanded(window.innerWidth > 992);
+        };
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
+    }, []);
 
-  return (
-    <BrowserRouter>
-      <MainContent
-        isSidebarExpanded={isSidebarExpanded}
-        toggleSidebar={() => setIsSidebarExpanded(!isSidebarExpanded)}
-        checkLoginStatus={checkLoginStatus}
-      />
-    </BrowserRouter>
-  );
+    return (
+        <BrowserRouter>
+            <MainContent
+                isSidebarExpanded={isSidebarExpanded}
+                toggleSidebar={() => setIsSidebarExpanded(!isSidebarExpanded)}
+                checkLoginStatus={checkLoginStatus}
+            />
+        </BrowserRouter>
+    );
 }
 
-// ======================
-// 🌟 MAIN CONTENT WRAPPER
-// ======================
 function MainContent({ isSidebarExpanded, toggleSidebar, checkLoginStatus }) {
-  const location = useLocation();
-  const navigate = useNavigate();
+    const location = useLocation();
+    const navigate = useNavigate();
 
-  const publicRoutes = [
-    "/login",
-    "/forgetPassword-1",
-    "/forgetPassword-2",
-    "/forgetPassword-3",
-  ];
+    const publicRoutes = [
+        "/login",
+        "/forgetPassword-1",
+        "/forgetPassword-2",
+        "/forgetPassword-3"
+    ];
 
-  const isPublic = publicRoutes.includes(location.pathname);
+    // 🔐 Auth Guard
+    useEffect(() => {
+        if (!checkLoginStatus() && !publicRoutes.includes(location.pathname)) {
+            navigate("/login");
+        }
+    }, [location, checkLoginStatus, navigate]);
 
-  // Redirect if not logged in
-  useEffect(() => {
-    if (!checkLoginStatus() && !isPublic) navigate("/login");
-  }, [location.pathname]);
+    // 🎨 Background control
+    useEffect(() => {
+        if (publicRoutes.includes(location.pathname)) {
+            document.body.style.backgroundColor = "#f4f6f9";
+        } else {
+            document.body.style.backgroundColor = "";
+        }
+    }, [location.pathname]);
 
-  // Change background on login pages
-  useEffect(() => {
-    document.body.style.backgroundColor = isPublic ? "#f4f6f9" : "";
-  }, [location.pathname]);
+    return (
+        <div className={`app-container ${isSidebarExpanded ? "sidebar-expanded" : "sidebar-collapsed"}`}>
 
-  return (
-    <div className="app-wrapper">
+            {/* Navbar + Sidebar */}
+            {!publicRoutes.includes(location.pathname) && <AdminNavbar toggleSidebar={toggleSidebar} />}
+            {!publicRoutes.includes(location.pathname) && <AdminSidebar isExpanded={isSidebarExpanded} />}
 
-      {/* ⭐ STICKY NAVBAR */}
-      {!isPublic && (
-        <AdminNavbar toggleSidebar={toggleSidebar} />
-      )}
+            <div className="content">
 
-      {/* ⭐ SIDEBAR + CONTENT */}
-      <div className="app-body">
+                <Routes>
 
-        {/* Sidebar */}
-        {!isPublic && (
-          <div className={`sidebar-area ${isSidebarExpanded ? "open" : ""}`}>
-            <AdminSidebar isExpanded={isSidebarExpanded} />
-          </div>
-        )}
+                    {/* AUTH */}
+                    <Route path="/login" element={<LoginPage />} />
+                    <Route path="/forgetPassword-1" element={<ForgetPasswordPage1 />} />
+                    <Route path="/forgetPassword-2" element={<ForgetPasswordPage2 />} />
+                    <Route path="/forgetPassword-3" element={<ForgetPasswordPage3 />} />
 
-        {/* Content */}
-        <main className="content-area">
-          <Routes>
+                    {/* HOME */}
+                    <Route path="/" element={<Home />} />
 
-            {/* Auth */}
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/forgetPassword-1" element={<ForgetPasswordPage1 />} />
-            <Route path="/forgetPassword-2" element={<ForgetPasswordPage2 />} />
-            <Route path="/forgetPassword-3" element={<ForgetPasswordPage3 />} />
+                    {/* SKILL */}
+                    <Route path="/skill" element={<AdminSkill />} />
+                    <Route path="/skill/create" element={<AdminCreateSkill />} />
+                    <Route path="/skill/update/:_id" element={<AdminUpdateSkill />} />
 
-            {/* Dashboard */}
-            <Route path="/" element={<Home />} />
+                    {/* CERTIFICATE */}
+                    <Route path="/certificate" element={<AdminCertificate />} />
+                    <Route path="/certificate/create" element={<AdminCreateCertificate />} />
+                    <Route path="/certificate/update/:_id" element={<AdminUpdateCertificate />} />
 
-            {/* Skills */}
-            <Route path="/skill" element={<AdminSkill />} />
-            <Route path="/skill/create" element={<AdminCreateSkill />} />
-            <Route path="/skill/update/:_id" element={<AdminUpdateSkill />} />
+                    {/* EDUCATION */}
+                    <Route path="/education" element={<AdminEducation />} />
+                    <Route path="/education/create" element={<AdminCreateEducation />} />
+                    <Route path="/education/update/:_id" element={<AdminUpdateEducation />} />
 
-            {/* Education */}
-            <Route path="/education" element={<AdminEducation />} />
-            <Route path="/education/create" element={<AdminCreateEducation />} />
-            <Route path="/education/update/:_id" element={<AdminUpdateEducation />} />
+                    {/* EXPERIENCE */}
+                    <Route path="/experience" element={<AdminExperience />} />
+                    <Route path="/experience/create" element={<AdminCreateExperience />} />
+                    <Route path="/experience/update/:_id" element={<AdminUpdateExperience />} />
 
-            {/* Experience */}
-            <Route path="/experience" element={<AdminExperience />} />
-            <Route path="/experience/create" element={<AdminCreateExperience />} />
-            <Route path="/experience/update/:_id" element={<AdminUpdateExperience />} />
+                    {/* TESTIMONIAL */}
+                    <Route path="/testimonial" element={<AdminTestimonial />} />
+                    <Route path="/testimonial/create" element={<AdminCreateTestimonial />} />
+                    <Route path="/testimonial/update/:_id" element={<AdminUpdateTestimonial />} />
 
-            {/* Certificate */}
-            <Route path="/certificate" element={<AdminCertificate />} />
-            <Route path="/certificate/create" element={<AdminCreateCertificate />} />
-            <Route path="/certificate/update/:_id" element={<AdminUpdateCertificate />} />
+                    {/* BLOG ✅ */}
+                    <Route path="/blog" element={<AdminBlog />} />
+                    <Route path="/blog/create" element={<AdminCreateBlog />} />
+                    <Route path="/blog/update/:_id" element={<AdminUpdateBlog />} />
 
-            {/* Portfolio */}
-            <Route path="/portfolio" element={<AdminPortfolio />} />
-            <Route path="/portfolio/create" element={<AdminCreatePortfolio />} />
-            <Route path="/portfolio/update/:_id" element={<AdminUpdatePortfolio />} />
+                    {/* Service ✅ */}
+                    <Route path="/service" element={<AdminService />} />
+                    <Route path="/service/create" element={<AdminCreateService />} />
+                    <Route path="/service/update/:_id" element={<AdminUpdateService />} />
 
-            {/* Service */}
-            <Route path="/service" element={<AdminService />} />
-            <Route path="/service/create" element={<AdminCreateService />} />
-            <Route path="/service/update/:_id" element={<AdminUpdateService />} />
+                    {/* Portfolio ✅ */}
+                    <Route path="/portfolio" element={<AdminPortfolio />} />
+                    <Route path="/portfolio/create" element={<AdminCreatePortfolio />} />
+                    <Route path="/portfolio/update/:_id" element={<AdminUpdatePortfolio />} />
 
-            {/* Testimonial */}
-            <Route path="/testimonial" element={<AdminTestimonial />} />
-            <Route path="/testimonial/create" element={<AdminCreateTestimonial />} />
-            <Route path="/testimonial/update/:_id" element={<AdminUpdateTestimonial />} />
+                    {/* NEWSLETTER */}
+                    <Route path="/newsletter" element={<AdminNewsletter />} />
 
-            {/* User */}
-            <Route path="/user" element={<AdminUser />} />
-            <Route path="/user/create" element={<AdminCreateUser />} />
-            <Route path="/user/update/:_id" element={<AdminUpdateUser />} />
+                    {/* USER */}
+                    <Route path="/user" element={<AdminUser />} />
+                    <Route path="/user/create" element={<AdminCreateUser />} />
+                    <Route path="/user/update/:_id" element={<AdminUpdateUser />} />
 
-            {/* Blog */}
-            <Route path="/blog" element={<AdminBlog />} />
-            <Route path="/blog/create" element={<AdminCreateBlog />} />
-            <Route path="/blog/update/:_id" element={<AdminUpdateBlog />} />
+                    {/* CONTACT */}
+                    <Route path="/contactus" element={<AdminContactUs />} />
+                    <Route path="/contactus/view/:_id" element={<AdminContactUsShow />} />
 
-            {/* Contact */}
-            <Route path="/contactus" element={<AdminContactUs />} />
-            <Route path="/contactus/view/:_id" element={<AdminContactUsShow />} />
+                    {/* PROFILE */}
+                    <Route path="/profile" element={<ProfilePage />} />
+                    <Route path="/update-profile" element={<UpdateProfilePage />} />
 
-            {/* Profile */}
-            <Route path="/profile" element={<ProfilePage />} />
-            <Route path="/update-profile" element={<UpdateProfilePage />} />
+                </Routes>
 
-            {/* Newsletter */}
-            <Route path="/newsletter" element={<AdminNewsletter />} />
+                {/* Footer */}
+                {!publicRoutes.includes(location.pathname) && <Footer />}
 
-          </Routes>
-
-          {!isPublic && <Footer />}
-        </main>
-      </div>
-    </div>
-  );
+            </div>
+        </div>
+    );
 }
-
-
-

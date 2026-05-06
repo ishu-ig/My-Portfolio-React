@@ -1,37 +1,32 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Link, useNavigate, useParams } from 'react-router-dom'
+import formValidator from "../../FormValidators/formValidator"
+import { updateService, getService } from '../../Redux/ActionCreators/ServiceActionCreators'
 
-
-import formValidator from '../../FormValidators/formValidator'
-
-
-import { getService, updateService } from "../../Redux/ActionCreartors/ServiceActionCreators"
-var rte
 export default function AdminUpdateService() {
-    var refdiv = useRef(null)
-    let { _id } = useParams()  //in case of real backend
-    // let { id } = useParams()
+    let { _id } = useParams()
+
     let [data, setData] = useState({
         name: "",
+        icon: "",
         shortDescription: "",
         longDescription: "",
-        category: "",
         price: "",
         duration: "",
-        icon: "",
+        category: "",
         technology: "",
         active: true
     })
     let [error, setError] = useState({
         name: "",
+        icon: "",
         shortDescription: "",
         longDescription: "",
-        category: "",
         price: "",
         duration: "",
-        icon: "",
-        technology: "",
+        category: "",
+        technology: ""
     })
     let [show, setShow] = useState(false)
     let navigate = useNavigate()
@@ -41,55 +36,36 @@ export default function AdminUpdateService() {
 
     function getInputData(e) {
         let name = e.target.name
-        let value = e.target.value  //in case of real backend
-        // let value = e.target.files ? "Service/" + e.target.files[0].name : e.target.value
+        let value = e.target.value
 
         if (name !== "active") {
-            setError((old) => {
-                return {
-                    ...old,
-                    [name]: formValidator(e)
-                }
-            })
-        }
-        setData((old) => {
-            return {
+            setError((old) => ({
                 ...old,
-                [name]: name === "active" ? (value === "1" ? true : false) : value
-            }
-        })
+                [name]: formValidator(e)
+            }))
+        }
+        setData((old) => ({
+            ...old,
+            [name]: name === "active" ? (value === "1" ? true : false) : value
+        }))
     }
+
     function postSubmit(e) {
         e.preventDefault()
         let errorItem = Object.values(error).find(x => x !== "")
         if (errorItem)
             setShow(true)
         else {
-            let item = ServiceStateData.find(x => x._id !== _id && x.name.toLocaleLowerCase() === data.name.toLocaleLowerCase())  // in case of real backend
-            // let item = ServiceStateData.find(x => x.id !== id && x.name.toLocaleLowerCase() === data.name.toLocaleLowerCase())
+            let item = ServiceStateData.find(x => x._id !== _id && x.name.toLocaleLowerCase() === data.name.toLocaleLowerCase())
             if (item) {
                 setShow(true)
-                setError((old) => {
-                    return {
-                        ...old,
-                        "name": "Service Already Exist"
-                    }
-                })
+                setError((old) => ({
+                    ...old,
+                    "name": "Service Already Exist"
+                }))
             }
             else {
-                dispatch(updateService({
-                    ...data,
-                    description: rte.getHTMLCode()
-                }));
-        
-                // //in case of real backend and form has a file field
-                // let formData = new FormData()
-                // formData.append("_id", data._id)  //use id in case of RDBMS and use _id in case of mongodb
-                // formData.append("name", data.name)
-                // formData.append("description", data.description)
-                // formData.append("level", data.level)
-                // formData.append("active", data.active)
-                // dispatch(updateService(formData))
+                dispatch(updateService({ ...data }))
                 navigate("/service")
             }
         }
@@ -99,12 +75,9 @@ export default function AdminUpdateService() {
         (() => {
             dispatch(getService())
             if (ServiceStateData.length) {
-                // let item = ServiceStateData.find(x => x.id === id)
-                let item = ServiceStateData.find(x => x._id === _id) //in case of real backend
-                setData({ ...item })
-                rte = new window.RichTextEditor(refdiv.current);
-                rte.setHTMLCode(item.longDescription);
-
+                let item = ServiceStateData.find(x => x._id === _id)
+                if (item)
+                    setData({ ...item })
             }
         })()
     }, [ServiceStateData.length])
@@ -112,71 +85,155 @@ export default function AdminUpdateService() {
     return (
         <>
             <div className="container">
-                <h5 className="text-center text-light bg-primary p-2">Update Service <Link to="/Service"><i className="fa fa-arrow-left text-light float-end pt-1"></i></Link></h5>
-                {/* Form */}
+                <h5 className="text-center text-light bg-primary p-2">
+                    Update Service{' '}
+                    <Link to="/service"><i className="fa fa-arrow-left text-light float-end pt-1"></i></Link>
+                </h5>
+
                 <div className="card mt-3 shadow-sm p-4">
                     <form onSubmit={postSubmit}>
+
+                        {/* Name */}
                         <div className="mb-3">
-                            <label>Service Name*</label>
-                            <input type="text" value={data.name} name="name" onChange={getInputData} placeholder='Service Name' className={`form-control border-3 ${show && error.name ? 'border-danger' : 'border-primary'}`} />
-                            {show && error.name ? <p className='text-danger text-capitalize'>{error.name}</p> : null}
+                            <label className="fw-bold">Name</label>
+                            <input
+                                type="text"
+                                name="name"
+                                onChange={getInputData}
+                                value={data.name}
+                                placeholder="Enter Service Name"
+                                className={`form-control ${show && error.name ? 'border-danger' : 'border-primary'}`}
+                            />
+                            {show && error.name && <p className="text-danger mt-1">{error.name}</p>}
                         </div>
+
+                        {/* Icon */}
                         <div className="mb-3">
-                            <label>Short Description*</label>
-                            <textarea name="shortDescription" value={data.shortDescription} onChange={getInputData} className={`form-control border-3 ${show && error.longDescription ? 'border-danger' : 'border-primary'}`} placeholder='Message...' rows={5}></textarea>
-                            {show && error.longDescription ? <p className='text-danger text-capitalize'>{error.longDescription}</p> : null}
+                            <label className="fw-bold">Icon <small className="text-muted fw-normal">(e.g. fa fa-code)</small></label>
+                            <div className="input-group">
+                                <span className="input-group-text border-primary">
+                                    <i className={data.icon}></i>
+                                </span>
+                                <input
+                                    type="text"
+                                    name="icon"
+                                    onChange={getInputData}
+                                    value={data.icon}
+                                    placeholder="Enter FontAwesome Icon Class"
+                                    className={`form-control ${show && error.icon ? 'border-danger' : 'border-primary'}`}
+                                />
+                            </div>
+                            {show && error.icon && <p className="text-danger mt-1">{error.icon}</p>}
                         </div>
+
+                        {/* Short Description */}
                         <div className="mb-3">
-                            <label>Description*</label>
-                            <div ref={refdiv} className='border-3 border-primary'></div>
+                            <label className="fw-bold">Short Description</label>
+                            <input
+                                type="text"
+                                name="shortDescription"
+                                onChange={getInputData}
+                                value={data.shortDescription}
+                                placeholder="Enter Short Description"
+                                className={`form-control ${show && error.shortDescription ? 'border-danger' : 'border-primary'}`}
+                            />
+                            {show && error.shortDescription && <p className="text-danger mt-1">{error.shortDescription}</p>}
                         </div>
+
+                        {/* Long Description */}
+                        <div className="mb-3">
+                            <label className="fw-bold">Long Description</label>
+                            <textarea
+                                name="longDescription"
+                                onChange={getInputData}
+                                value={data.longDescription}
+                                placeholder="Enter Long Description"
+                                rows={4}
+                                className={`form-control ${show && error.longDescription ? 'border-danger' : 'border-primary'}`}
+                            />
+                            {show && error.longDescription && <p className="text-danger mt-1">{error.longDescription}</p>}
+                        </div>
+
+                        {/* Price & Duration */}
                         <div className="row">
                             <div className="col-md-6 mb-3">
-                                <label>Category*</label>
-                                <input type="text" value={data.category} name="category" onChange={getInputData} className={`form-control border-3 ${show && error.category ? 'border-danger' : 'border-primary'}`} />
-                                {show && error.category ? <p className='text-danger text-capitalize'>{error.category}</p> : null}
+                                <label className="fw-bold">Price</label>
+                                <input
+                                    type="number"
+                                    name="price"
+                                    onChange={getInputData}
+                                    value={data.price}
+                                    placeholder="Enter Price"
+                                    className={`form-control ${show && error.price ? 'border-danger' : 'border-primary'}`}
+                                />
+                                {show && error.price && <p className="text-danger mt-1">{error.price}</p>}
                             </div>
 
                             <div className="col-md-6 mb-3">
-                                <label>Duration*</label>
-                                <input type="Number" name="duration" value={data.duration} onChange={getInputData} className={`form-control border-3 ${show && error.duration ? 'border-danger' : 'border-primary'}`} />
-                                {show && error.duration ? <p className='text-danger text-capitalize'>{error.duration}</p> : null}
+                                <label className="fw-bold">Duration</label>
+                                <input
+                                    type="text"
+                                    name="duration"
+                                    onChange={getInputData}
+                                    value={data.duration}
+                                    placeholder="e.g. 2 weeks, 1 month"
+                                    className={`form-control ${show && error.duration ? 'border-danger' : 'border-primary'}`}
+                                />
+                                {show && error.duration && <p className="text-danger mt-1">{error.duration}</p>}
                             </div>
                         </div>
+
+                        {/* Category & Technology */}
                         <div className="row">
                             <div className="col-md-6 mb-3">
-                                <label>Price*</label>
-                                <input type="Number" name="price" value={data.price} onChange={getInputData} className={`form-control border-3 ${show && error.price ? 'border-danger' : 'border-primary'}`} />
-                                {show && error.price ? <p className='text-danger text-capitalize'>{error.price}</p> : null}
+                                <label className="fw-bold">Category</label>
+                                <input
+                                    type="text"
+                                    name="category"
+                                    onChange={getInputData}
+                                    value={data.category}
+                                    placeholder="Enter Category"
+                                    className={`form-control ${show && error.category ? 'border-danger' : 'border-primary'}`}
+                                />
+                                {show && error.category && <p className="text-danger mt-1">{error.category}</p>}
                             </div>
 
                             <div className="col-md-6 mb-3">
-                                <label>Technology*</label>
-                                <input type="text" name="technology" value={data.technology} onChange={getInputData} className={`form-control border-3 ${show && error.technology ? 'border-danger' : 'border-primary'}`} />
-                                {show && error.technology ? <p className='text-danger text-capitalize'>{error.technology}</p> : null}
+                                <label className="fw-bold">Technology</label>
+                                <input
+                                    type="text"
+                                    name="technology"
+                                    onChange={getInputData}
+                                    value={data.technology}
+                                    placeholder="Enter Technology"
+                                    className={`form-control ${show && error.technology ? 'border-danger' : 'border-primary'}`}
+                                />
+                                {show && error.technology && <p className="text-danger mt-1">{error.technology}</p>}
                             </div>
                         </div>
-                        <div className="row">
-                            <div className="col-md-6 mb-3">
-                                <label>Icon*</label>
-                                <input type="text" name="icon" value={data.icon} onChange={getInputData} className={`form-control border-3 ${show && error.icon ? 'border-danger' : 'border-primary'}`} />
-                                {show && error.icon ? <p className='text-danger text-capitalize'>{error.icon}</p> : null}
-                            </div>
 
-                            <div className="col-md-6 mb-3">
-                                <label>Active*</label>
-                                <select name="active" value={data.active ? "1" : "0"} onChange={getInputData} className='form-select border-3 border-primary'>
-                                    <option value="1">Yes</option>
-                                    <option value="0">No</option>
-                                </select>
-                            </div>
-                        </div>
-
+                        {/* Active */}
                         <div className="mb-3">
-                            <button type="submit" className='btn btn-primary w-100 text-light'>Update</button>
+                            <label className="fw-bold">Active</label>
+                            <select
+                                name="active"
+                                value={data.active ? "1" : "0"}
+                                onChange={getInputData}
+                                className="form-select border-primary"
+                            >
+                                <option value="1">Yes</option>
+                                <option value="0">No</option>
+                            </select>
                         </div>
+
+                        {/* Submit Button */}
+                        <div className="mb-3">
+                            <button type="submit" className="btn btn-primary w-100 text-light p-2">
+                                <i className="fa fa-save"></i> Update Service
+                            </button>
+                        </div>
+
                     </form>
-
                 </div>
             </div>
         </>

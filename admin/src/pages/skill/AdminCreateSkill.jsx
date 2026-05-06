@@ -1,11 +1,8 @@
 import React, { useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
-
-
-import formValidator from '../../FormValidators/formValidator'
-
-import { createSkill, getSkill } from "../../Redux/ActionCreartors/SkillActionCreators"
+import { Link, useNavigate } from 'react-router-dom'
+import formValidator from "../../FormValidators/formValidator"
+import { createSkill, getSkill } from '../../Redux/ActionCreators/SkillActionCreators'
 
 export default function AdminCreateSkill() {
     let [data, setData] = useState({
@@ -15,37 +12,38 @@ export default function AdminCreateSkill() {
         active: true
     })
     let [error, setError] = useState({
-        name: "Name Field is Mendatory",
-        description: "Description Field is Mendatory",
-        level: "Level Field is Mendatory"
+        name: "Name Field is Mandatory",
+        description: "Description Field is Mandatory",
+        level: "Level Field is Mandatory",
     })
     let [show, setShow] = useState(false)
     let navigate = useNavigate()
-
 
     let SkillStateData = useSelector(state => state.SkillStateData)
     let dispatch = useDispatch()
 
     function getInputData(e) {
         let name = e.target.name
-        let value =  e.target.value  //in case of real backend
-        // let value = e.target.files ? "Skill/" + e.target.files[0].name : e.target.value
+        let value = e.target.value
 
         if (name !== "active") {
             setError((old) => {
                 return {
                     ...old,
-                    [name]:formValidator(e)
+                    [name]: formValidator(e)
                 }
             })
         }
         setData((old) => {
             return {
                 ...old,
-                [name]: name === "active" ? (value === "1" ? true : false) : value
+                [name]: name === "active" ? (value === "1" ? true : false)
+                       : name === "level" ? Number(value)
+                       : value
             }
         })
     }
+
     function postSubmit(e) {
         e.preventDefault()
         let errorItem = Object.values(error).find(x => x !== "")
@@ -64,15 +62,6 @@ export default function AdminCreateSkill() {
             }
             else {
                 dispatch(createSkill({ ...data }))
-
-                // //in case of real backend and form has a file field
-                // let formData = new FormData()
-                // formData.append("name", data.name)
-                // formData.append("description", data.description)
-                // formData.append("level", data.level)
-                // formData.append("active", data.active)
-                // dispatch(createSkill(formData))
-
                 navigate("/skill")
             }
         }
@@ -87,39 +76,75 @@ export default function AdminCreateSkill() {
     return (
         <>
             <div className="container">
-                <h5 className="text-center text-light bg-primary p-2">Create Skill <Link to="/skill"><i className="fa fa-arrow-left text-light float-end pt-1"></i></Link></h5>
-                {/* Form */}
+                <h5 className="text-center text-light bg-primary p-2">
+                    Create Skill
+                    <Link to="/skill"><i className="fa fa-arrow-left text-light float-end pt-1"></i></Link>
+                </h5>
                 <div className="card mt-3 shadow-sm p-4">
                     <form onSubmit={postSubmit}>
+
+                        {/* Name Field */}
                         <div className="mb-3">
-                            <label>Skill Name*</label>
-                            <input type="text" name="name" onChange={getInputData} placeholder='Skill Name' className={`form-control border-3 ${show && error.name ? 'border-danger' : 'border-primary'}`} />
-                            {show && error.name ? <p className='text-danger text-capitalize'>{error.name}</p> : null}
+                            <label className="fw-bold">Name*</label>
+                            <input
+                                type="text"
+                                name="name"
+                                onChange={getInputData}
+                                placeholder="Enter Skill Name"
+                                className={`form-control ${show && error.name ? 'border-danger' : 'border-primary'}`}
+                            />
+                            {show && error.name && <p className="text-danger mt-1">{error.name}</p>}
                         </div>
+
+                        {/* Description Field */}
                         <div className="mb-3">
-                            <label>Description*</label>
-                            <textarea name="description" onChange={getInputData} className={`form-control border-3 ${show && error.description ? 'border-danger' : 'border-primary'}`} placeholder='Message...' rows={5}></textarea>
-                            {show && error.description ? <p className='text-danger text-capitalize'>{error.description}</p> : null}
+                            <label className="fw-bold">Description*</label>
+                            <textarea
+                                name="description"
+                                onChange={getInputData}
+                                placeholder="Enter Skill Description"
+                                rows={3}
+                                className={`form-control ${show && error.description ? 'border-danger' : 'border-primary'}`}
+                            />
+                            {show && error.description && <p className="text-danger mt-1">{error.description}</p>}
                         </div>
+
+                        {/* Level & Active Status */}
                         <div className="row">
+                            {/* Level Field */}
                             <div className="col-md-6 mb-3">
-                                <label>Level*</label>
-                                <input type="Number" name="level" onChange={getInputData} className={`form-control border-3 ${show && error.level ? 'border-danger' : 'border-primary'}`} />
-                                {show && error.level ? <p className='text-danger text-capitalize'>{error.level}</p> : null}
+                                <label className="fw-bold">Level*</label>
+                                <input
+                                    type="number"
+                                    name="level"
+                                    onChange={getInputData}
+                                    placeholder="Enter Skill Level"
+                                    className={`form-control ${show && error.level ? 'border-danger' : 'border-primary'}`}
+                                />
+                                {show && error.level && <p className="text-danger mt-1">{error.level}</p>}
                             </div>
 
+                            {/* Active Status */}
                             <div className="col-md-6 mb-3">
-                                <label>Active*</label>
-                                <select name="active" onChange={getInputData} className='form-select border-3 border-primary'>
+                                <label className="fw-bold">Active</label>
+                                <select
+                                    name="active"
+                                    onChange={getInputData}
+                                    className="form-select border-primary"
+                                >
                                     <option value="1">Yes</option>
                                     <option value="0">No</option>
                                 </select>
                             </div>
                         </div>
 
+                        {/* Submit Button */}
                         <div className="mb-3">
-                            <button type="submit" className='btn btn-primary w-100 text-light'>Create</button>
+                            <button type="submit" className="btn btn-primary w-100 text-light">
+                                <i className="fa fa-save"></i> Create Skill
+                            </button>
                         </div>
+
                     </form>
                 </div>
             </div>
