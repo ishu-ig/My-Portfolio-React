@@ -56,10 +56,6 @@ import AdminUser from './pages/user/AdminUser';
 import AdminCreateUser from './pages/user/AdminCreateUser';
 import AdminUpdateUser from './pages/user/AdminUpdateUser';
 
-// Contact
-import AdminContactUs from './pages/contactUs/AdminContactUs';
-import AdminContactUsShow from './pages/contactUs/AdminContactUsShow';
-
 // Extra
 import AdminCreateService from './pages/service/AdminCreateService';
 import AdminUpdateService from './pages/service/AdminUpdateService';
@@ -67,6 +63,8 @@ import AdminService from './pages/service/AdminService';
 import AdminPortfolio from './pages/portfolio/AdminPortfolio';
 import AdminCreatePortfolio from './pages/portfolio/AdminCreatePortfolio';
 import AdminUpdatePortfolio from './pages/portfolio/AdminUpdatePortfolio';
+import AdminContactUsShow from './pages/contactUs/AdminContactUsShow';
+import AdminContactUs from './pages/contactUs/AdminContactUs';
 
 export default function App() {
     const [isSidebarExpanded, setIsSidebarExpanded] = useState(window.innerWidth > 992);
