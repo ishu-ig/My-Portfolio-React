@@ -74,7 +74,7 @@ export default function AdminEducation() {
                                         {item.active ? "Yes" : "No"}
                                     </td>
                                     <td>
-                                        <Link to={`/maincategory/update/${item._id}`} className="btn btn-primary text-light btn-sm">
+                                        <Link to={`/education/update/${item._id}`} className="btn btn-primary text-light btn-sm">
                                             <i className="fa fa-edit fs-5"></i>
                                         </Link>
                                     </td>
