@@ -51,7 +51,6 @@ export default function AdminEducation() {
                         <thead className="text-light" style={{ backgroundColor: "#1F2A40" }}>
                             <tr>
                                 <th>Id</th>
-                                <th>Name</th>
                                 <th>Institute Name</th>
                                 <th>Start Date</th>
                                 <th>End Date</th>
@@ -65,7 +64,6 @@ export default function AdminEducation() {
                             {EducationStateData.map((item) => (
                                 <tr key={item._id}>
                                     <td>{item._id}</td>
-                                    <td>{item.name}</td>
                                     <td>{item.instituteName}</td>
                                     <td>{item.startDate}</td>
                                     <td>{item.endDate}</td>
