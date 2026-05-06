@@ -51,6 +51,7 @@ export default function AdminEducation() {
                         <thead className="text-light" style={{ backgroundColor: "#1F2A40" }}>
                             <tr>
                                 <th>Id</th>
+                                <th>Degree Name</th>
                                 <th>Institute Name</th>
                                 <th>Start Date</th>
                                 <th>End Date</th>
@@ -64,6 +65,7 @@ export default function AdminEducation() {
                             {EducationStateData.map((item) => (
                                 <tr key={item._id}>
                                     <td>{item._id}</td>
+                                    <td>{item.degreeName}</td>
                                     <td>{item.instituteName}</td>
                                     <td>{item.startDate}</td>
                                     <td>{item.endDate}</td>
@@ -72,7 +74,7 @@ export default function AdminEducation() {
                                         {item.active ? "Yes" : "No"}
                                     </td>
                                     <td>
-                                        <Link to={`/education/update/${item._id}`} className="btn btn-primary text-light btn-sm">
+                                        <Link to={`/maincategory/update/${item._id}`} className="btn btn-primary text-light btn-sm">
                                             <i className="fa fa-edit fs-5"></i>
                                         </Link>
                                     </td>
