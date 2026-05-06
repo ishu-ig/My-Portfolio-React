@@ -58,7 +58,7 @@ import AdminUpdateUser from './pages/user/AdminUpdateUser';
 
 // Contact
 import AdminContactUs from './pages/contactUs/AdminContactUs';
-import AdminContactUsShow from './pages/contactUs/AdminShowContactUs';
+import AdminContactUsShow from './pages/contactUs/AdminContactUsShow';
 
 // Extra
 import AdminCreateService from './pages/service/AdminCreateService';
