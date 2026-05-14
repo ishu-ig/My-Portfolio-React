@@ -60,12 +60,18 @@ export default function Testimonial() {
   return (
     <section id="testimonials" className="testimonials-section py-5" style={{ backgroundColor: "var(--bg-color)", color: "var(--text-color)", overflowX: "hidden" }}>
       <div className="container text-center">
-        <h2 className="section-title" style={{color:"var(--text-color)"}} data-aos="fade-down">
-          Testimonials
-          <button className="btn btn-primary mb-4 float-end" onClick={() => setShowModal(true)}>
+        <div className="d-flex align-items-center justify-content-center position-relative mb-1">
+          <h2 className="section-title mb-0" style={{color:"var(--text-color)"}} data-aos="fade-down">
+            Testimonials
+          </h2>
+          <button
+            className="btn btn-primary"
+            onClick={() => setShowModal(true)}
+            style={{ position: 'absolute', right: 0 }}
+          >
             <i className='fa fa-plus fs-5 text-light'></i>
           </button>
-        </h2>
+        </div>
 
         <div className="title-shape" data-aos="fade-up">
           <svg viewBox="0 0 200 20"><path d="M 0,10 C 40,0 60,20 100,10 C 140,0 160,20 200,10" fill="none" stroke="currentColor" strokeWidth="2"/></svg>
