@@ -1,4 +1,4 @@
-const Achievement = require("../Models/Achievement");
+const Achievement = require("../models/Achievement")
 
 const getRecord = async (req, res) => {
   try {
