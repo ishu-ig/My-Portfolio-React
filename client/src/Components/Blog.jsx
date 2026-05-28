@@ -3,16 +3,15 @@ import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getBlog } from "../Redux/ActionCreators/BlogActionCreators";
 import BlogCard from "./BlogCard";
-import {Link} from "react-router-dom";
+import { Link } from "react-router-dom";
 import AOS from "aos";
 import "aos/dist/aos.css";
 
 import { Swiper, SwiperSlide } from "swiper/react";
-import { FreeMode, Pagination } from "swiper/modules";
+import { FreeMode } from "swiper/modules";
 
 import "swiper/css";
 import "swiper/css/free-mode";
-import "swiper/css/pagination";
 
 export default function Blog() {
     const dispatch = useDispatch();
@@ -31,7 +30,7 @@ export default function Blog() {
         >
             <div className="container text-center">
 
-                <h2 className="section-title" data-aos="fade-up" style={{color:"var(--text-color)"}}>
+                <h2 className="section-title" data-aos="fade-up" style={{ color: "var(--text-color)" }}>
                     Latest Blogs
                 </h2>
 
@@ -55,33 +54,26 @@ export default function Blog() {
                     Explore expert articles, health tips, and the latest insights in AI-driven healthcare.
                 </p>
 
-                {/* ------------ SWIPER SLIDER ------------ */}
                 <Swiper
                     freeMode={true}
                     modules={[FreeMode]}
                     className="mySwiper"
-                    spaceBetween={20}
                     loop={true}
                     breakpoints={{
-                        0: { slidesPerView: 1 },
-                        576: { slidesPerView: 1.2 },
-                        768: { slidesPerView: 2 },
-                        992: { slidesPerView: 3 },
-                        1200: { slidesPerView: 3.3 },
+                        0:    { slidesPerView: 2, spaceBetween: 10 },
+                        768:  { slidesPerView: 2, spaceBetween: 16 },
+                        992:  { slidesPerView: 3, spaceBetween: 20 },
+                        1200: { slidesPerView: 3.3, spaceBetween: 20 },
                     }}
                 >
                     {Array.isArray(BlogStateData) &&
                         BlogStateData.filter((b) => b.active).map((blog, index) => (
-                            <SwiperSlide
-                                key={blog._id}
-                                style={{ width: "360px" }}
-                            >
+                            <SwiperSlide key={blog._id}>
                                 <BlogCard blog={blog} index={index} />
                             </SwiperSlide>
                         ))}
                 </Swiper>
 
-                {/* -------- VIEW MORE BLOGS BUTTON -------- */}
                 <div className="text-center mt-4">
                     <Link
                         to="/blog"

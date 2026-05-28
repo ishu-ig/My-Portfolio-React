@@ -39,7 +39,7 @@ export default function Skills() {
         </p>
 
         <div
-          className="row g-4 skills-container"
+          className="row g-4 skills-container justify-content-center"
           style={{
             backgroundColor: "var(--bg-color)",
             color: "var(--text-color)",

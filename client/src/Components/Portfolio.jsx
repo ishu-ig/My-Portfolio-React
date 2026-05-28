@@ -29,7 +29,6 @@ export default function Portfolio() {
 
                 .pf-section { padding: 80px 0 100px; background: var(--bg-color); color: var(--text-color); }
 
-                /* Header */
                 .pf-eyebrow {
                     font-family: 'DM Sans', sans-serif;
                     font-size: 11px; font-weight: 500; letter-spacing: 3px;
@@ -49,7 +48,6 @@ export default function Portfolio() {
                     max-width: 460px; margin: 0 auto; line-height: 1.7;
                 }
 
-                /* Filter pills */
                 .pf-filters {
                     display: flex; flex-wrap: wrap; gap: 8px;
                     justify-content: center; margin-bottom: 40px;
@@ -75,39 +73,15 @@ export default function Portfolio() {
                     box-shadow: 0 4px 14px rgba(var(--primary-rgb, 108,99,255), 0.35);
                 }
 
-                /* Grid — desktop: 3 cols */
                 .pf-grid {
-                    display: grid;
-                    grid-template-columns: repeat(3, 1fr);
+                    display: flex;
+                    flex-wrap: wrap;
                     gap: 24px;
+                    justify-content: center;
                 }
 
-                /* Tablet: 2 cols */
-                @media (max-width: 992px) {
-                    .pf-grid {
-                        grid-template-columns: repeat(2, 1fr);
-                        gap: 20px;
-                    }
-                }
-
-                /* Mobile: 2 cols */
-                @media (max-width: 768px) {
-                    .pf-grid {
-                        grid-template-columns: repeat(2, 1fr);
-                        gap: 14px;
-                    }
-                }
-
-                /* Very small screens (< 360px): 1 col */
-                @media (max-width: 359px) {
-                    .pf-grid {
-                        grid-template-columns: 1fr;
-                        gap: 14px;
-                    }
-                }
-
-                /* Card */
                 .pf-card {
+                    width: calc(33.33% - 16px);
                     border-radius: 16px;
                     overflow: hidden;
                     background: var(--card-bg, #fff);
@@ -118,8 +92,21 @@ export default function Portfolio() {
                     opacity: 0;
                     transform: translateY(22px);
                     animation: pf-fadein 0.45s ease forwards;
-                    min-width: 0; /* prevent grid blowout */
+                    min-width: 0;
                 }
+
+                @media (max-width: 992px) {
+                    .pf-grid { gap: 20px; }
+                    .pf-card { width: calc(50% - 10px); }
+                }
+                @media (max-width: 768px) {
+                    .pf-grid { gap: 14px; }
+                    .pf-card { width: calc(50% - 7px); }
+                }
+                @media (max-width: 359px) {
+                    .pf-card { width: 100%; }
+                }
+
                 .pf-card:hover {
                     transform: translateY(-8px);
                     border-color: var(--primary-color);
@@ -130,29 +117,22 @@ export default function Portfolio() {
                     to { opacity: 1; transform: translateY(0); }
                 }
 
-                /* Image wrapper */
                 .pf-img-wrap {
                     position: relative;
                     height: 200px;
                     overflow: hidden;
                     background: var(--card-bg);
                 }
-
-                /* Shorter image on mobile so card doesn't feel cramped */
                 @media (max-width: 768px) {
                     .pf-img-wrap { height: 130px; }
                 }
-
                 .pf-img-wrap img {
                     width: 100%; height: 100%; object-fit: cover;
                     display: block;
                     transition: transform 0.38s cubic-bezier(.22,1,.36,1);
                 }
-                .pf-card:hover .pf-img-wrap img {
-                    transform: scale(1.06);
-                }
+                .pf-card:hover .pf-img-wrap img { transform: scale(1.06); }
 
-                /* Category badge */
                 .pf-badge {
                     position: absolute; top: 8px; left: 8px;
                     background: var(--primary-color); color: #fff;
@@ -163,7 +143,6 @@ export default function Portfolio() {
                     box-shadow: 0 2px 8px rgba(0,0,0,0.18);
                 }
 
-                /* Hover overlay */
                 .pf-overlay {
                     position: absolute; inset: 0;
                     background: linear-gradient(160deg, rgba(10,14,40,0.72) 0%, rgba(10,14,40,0.55) 100%);
@@ -191,9 +170,7 @@ export default function Portfolio() {
                     color: #fff;
                 }
 
-                /* Card body */
                 .pf-card-body { padding: 11px 13px 13px; }
-
                 .pf-card-name {
                     font-family: 'DM Sans', sans-serif;
                     font-size: 13px; font-weight: 500;
@@ -206,8 +183,6 @@ export default function Portfolio() {
                     font-size: 11px; color: var(--muted-color);
                     margin: 0; display: flex; align-items: center; gap: 4px;
                 }
-
-                /* Hide category text on very small cards, keep icon */
                 @media (max-width: 400px) {
                     .pf-card-cat-text { display: none; }
                 }
@@ -234,17 +209,15 @@ export default function Portfolio() {
                 }
                 .pf-live-link:hover { color: var(--primary-color); }
 
-                /* Empty state */
                 .pf-empty {
                     text-align: center; padding: 60px 20px;
                     font-family: 'DM Sans', sans-serif;
                     color: var(--muted-color); font-size: 15px;
-                    grid-column: 1 / -1;
+                    width: 100%;
                 }
             `}</style>
 
             <section id="portfolio" className="pf-section">
-                {/* Header */}
                 <div className="container-fluid px-4 px-lg-5 text-center mb-5" data-aos="fade-up">
                     <p className="pf-eyebrow">My Work</p>
                     <h2 className="pf-title">Portfolio</h2>
@@ -260,7 +233,6 @@ export default function Portfolio() {
                     </p>
                 </div>
 
-                {/* Filter Pills */}
                 <div className="container-fluid px-4 px-lg-5" data-aos="fade-up">
                     <div className="pf-filters">
                         {categories.map(cat => (
@@ -275,7 +247,6 @@ export default function Portfolio() {
                     </div>
                 </div>
 
-                {/* Grid */}
                 <div className="container-fluid px-4 px-lg-5" data-aos="fade-up" data-aos-delay="100">
                     <div className="pf-grid">
                         {filtered.length === 0 && (
@@ -289,7 +260,6 @@ export default function Portfolio() {
                                 onMouseEnter={() => setHoveredId(item._id)}
                                 onMouseLeave={() => setHoveredId(null)}
                             >
-                                {/* Image + overlay */}
                                 <div className="pf-img-wrap">
                                     <img src={item.pic} alt={item.name} loading="lazy" />
                                     <span className="pf-badge">{item.category}</span>
@@ -313,7 +283,6 @@ export default function Portfolio() {
                                     </div>
                                 </div>
 
-                                {/* Card body */}
                                 <div className="pf-card-body">
                                     <p className="pf-card-name">{item.name}</p>
                                     <p className="pf-card-cat">

@@ -26,20 +26,15 @@ export default function Certificates() {
                     background-color: var(--bg-color);
                 }
 
-                /* Grid — 3 cols desktop, 2 cols tablet+mobile, 1 col tiny */
                 .cert-grid {
-                    display: grid;
-                    grid-template-columns: repeat(3, 1fr);
+                    display: flex;
+                    flex-wrap: wrap;
                     gap: 20px;
-                }
-                @media (max-width: 992px) {
-                    .cert-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
-                }
-                @media (max-width: 359px) {
-                    .cert-grid { grid-template-columns: 1fr; }
+                    justify-content: center;
                 }
 
                 .cert-card {
+                    width: calc(33.33% - 14px);
                     background: var(--card-bg);
                     border-radius: 14px;
                     border: 1px solid var(--border-color);
@@ -50,13 +45,19 @@ export default function Certificates() {
                     flex-direction: column;
                     min-width: 0;
                 }
+                @media (max-width: 992px) {
+                    .cert-card { width: calc(50% - 10px); }
+                }
+                @media (max-width: 359px) {
+                    .cert-card { width: 100%; }
+                }
+
                 .cert-card:hover {
                     transform: translateY(-7px);
                     border-color: var(--primary-color);
                     box-shadow: 0 16px 40px rgba(0,0,0,0.12);
                 }
 
-                /* Verified ribbon */
                 .cert-ribbon {
                     position: absolute; top: 12px; right: 0;
                     background: var(--primary-color); color: #fff;
@@ -66,7 +67,6 @@ export default function Certificates() {
                     z-index: 2; display: flex; align-items: center; gap: 4px;
                 }
 
-                /* Image */
                 .cert-img-wrap {
                     display: block;
                     position: relative;
@@ -101,7 +101,6 @@ export default function Certificates() {
                     display: flex; align-items: center; gap: 5px;
                 }
 
-                /* Body */
                 .cert-body {
                     padding: 12px 14px 14px;
                     flex: 1; display: flex; flex-direction: column;
@@ -144,7 +143,6 @@ export default function Certificates() {
                 }
                 .cert-open-link:hover { text-decoration: underline; }
 
-                /* Stats bar */
                 .cert-stats {
                     display: flex; align-items: center; justify-content: center;
                     gap: 32px; padding: 14px 24px;
