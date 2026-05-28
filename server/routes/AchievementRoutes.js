@@ -6,7 +6,7 @@ const {
   updateRecord,
   deleteRecord,
   toggleRecord,
-} = require("../Controllers/AchievementController");
+} = require("../controllers/AchievementController")
 
 // Public
 RecordRouter.get("/",          getRecord);
