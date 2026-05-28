@@ -1,5 +1,26 @@
 const Blog = require("../models/Blog");
-const fs = require("fs");
+const cloudinary = require("../cloudinary");
+
+// Helper: extract Cloudinary public_id from URL
+function getPublicId(url) {
+    if (!url) return null;
+    // e.g. https://res.cloudinary.com/cloud/image/upload/v123/portfolio/blog/abc.jpg
+    const parts = url.split("/");
+    const uploadIndex = parts.indexOf("upload");
+    if (uploadIndex === -1) return null;
+    // Skip version segment (v123)
+    const pathParts = parts.slice(uploadIndex + 2);
+    return pathParts.join("/").replace(/\.[^/.]+$/, ""); // remove extension
+}
+
+// Helper: delete from Cloudinary
+async function deleteFromCloudinary(url) {
+    const publicId = getPublicId(url);
+    if (!publicId) return;
+    try {
+        await cloudinary.uploader.destroy(publicId);
+    } catch (e) {}
+}
 
 // ==================================================
 // CREATE BLOG
@@ -9,46 +30,32 @@ async function createRecord(req, res) {
         let data = new Blog(req.body);
 
         if (req.file) {
-            data.pic = req.file.path;
+            data.pic = req.file.path; // Cloudinary URL
         }
 
         await data.save();
 
-        res.send({
-            result: "Done",
-            data: data
-        });
+        res.send({ result: "Done", data });
 
     } catch (error) {
+        // Delete uploaded Cloudinary file if validation fails
+        if (req.file) await deleteFromCloudinary(req.file.path);
 
-        // Delete uploaded file if validation fails
-        try {
-            fs.unlinkSync(req.file?.path);
-        } catch (e) {}
-
-        // Custom error field mapping
         let errorMessage = {};
-        error.errors?.title ? errorMessage.title = error.errors.title.message : null;
-        error.errors?.pic ? errorMessage.pic = error.errors.pic.message : null;
-        error.errors?.shortDescription ? errorMessage.shortDescription = error.errors.shortDescription.message : null;
-        error.errors?.longDescription ? errorMessage.longDescription = error.errors.longDescription.message : null;
-        error.errors?.category ? errorMessage.category = error.errors.category.message : null;
-        error.errors?.author ? errorMessage.author = error.errors.author.message : null;
+        error.errors?.title           && (errorMessage.title            = error.errors.title.message);
+        error.errors?.pic             && (errorMessage.pic              = error.errors.pic.message);
+        error.errors?.shortDescription && (errorMessage.shortDescription = error.errors.shortDescription.message);
+        error.errors?.longDescription  && (errorMessage.longDescription  = error.errors.longDescription.message);
+        error.errors?.category        && (errorMessage.category         = error.errors.category.message);
+        error.errors?.author          && (errorMessage.author           = error.errors.author.message);
 
-        if (Object.values(errorMessage).length === 0) {
-            return res.status(500).send({
-                result: "Fail",
-                reason: "Internal Server Error"
-            });
+        if (Object.keys(errorMessage).length === 0) {
+            return res.status(500).send({ result: "Fail", reason: "Internal Server Error" });
         } else {
-            return res.status(400).send({
-                result: "Fail",
-                reason: errorMessage
-            });
+            return res.status(400).send({ result: "Fail", reason: errorMessage });
         }
     }
 }
-
 
 // ==================================================
 // GET ALL BLOGS
@@ -56,19 +63,11 @@ async function createRecord(req, res) {
 async function getRecord(req, res) {
     try {
         let data = await Blog.find().sort({ _id: -1 });
-        res.send({
-            result: "Done",
-            count: data.length,
-            data: data
-        });
+        res.send({ result: "Done", count: data.length, data });
     } catch (error) {
-        res.status(500).send({
-            result: "Fail",
-            reason: "Internal Server Error"
-        });
+        res.status(500).send({ result: "Fail", reason: "Internal Server Error" });
     }
 }
-
 
 // ==================================================
 // GET SINGLE BLOG
@@ -78,25 +77,14 @@ async function getSingleRecord(req, res) {
         let data = await Blog.findOne({ _id: req.params._id });
 
         if (data) {
-            res.send({
-                result: "Done",
-                data: data
-            });
+            res.send({ result: "Done", data });
         } else {
-            res.status(404).send({
-                result: "Fail",
-                reason: "Record Not Found"
-            });
+            res.status(404).send({ result: "Fail", reason: "Record Not Found" });
         }
-
     } catch (error) {
-        res.status(500).send({
-            result: "Fail",
-            reason: "Internal Server Error"
-        });
+        res.status(500).send({ result: "Fail", reason: "Internal Server Error" });
     }
 }
-
 
 // ==================================================
 // UPDATE BLOG
@@ -106,51 +94,34 @@ async function updateRecord(req, res) {
         let data = await Blog.findOne({ _id: req.params._id });
 
         if (!data) {
-            return res.status(404).send({
-                result: "Fail",
-                reason: "Record Not Found"
-            });
+            return res.status(404).send({ result: "Fail", reason: "Record Not Found" });
         }
 
-        // Update fields
-        data.title = req.body.title ?? data.title;
+        data.title            = req.body.title            ?? data.title;
         data.shortDescription = req.body.shortDescription ?? data.shortDescription;
-        data.longDescription = req.body.longDescription ?? data.longDescription;
-        data.category = req.body.category ?? data.category;
-        data.tags = req.body.tags ?? data.tags;
-        data.author = req.body.author ?? data.author;
-        data.active = req.body.active ?? data.active;
+        data.longDescription  = req.body.longDescription  ?? data.longDescription;
+        data.category         = req.body.category         ?? data.category;
+        data.tags             = req.body.tags             ?? data.tags;
+        data.author           = req.body.author           ?? data.author;
+        data.active           = req.body.active           ?? data.active;
 
-        // Save text fields
+        if (req.file) {
+            // Delete old image from Cloudinary before replacing
+            await deleteFromCloudinary(data.pic);
+            data.pic = req.file.path; // new Cloudinary URL
+        }
+
         await data.save();
 
-        // If new image uploaded, replace old
-        if (req.file) {
-            try {
-                fs.unlinkSync(data.pic);
-            } catch (e) {}
-
-            data.pic = req.file.path;
-            await data.save();
-        }
-
-        res.send({
-            result: "Done",
-            data: data
-        });
+        res.send({ result: "Done", data });
 
     } catch (error) {
-        try {
-            fs.unlinkSync(req.file?.path);
-        } catch (e) {}
+        // Delete newly uploaded file if update failed
+        if (req.file) await deleteFromCloudinary(req.file.path);
 
-        res.status(400).send({
-            result: "Fail",
-            reason: "Internal Server Error"
-        });
+        res.status(400).send({ result: "Fail", reason: "Internal Server Error" });
     }
 }
-
 
 // ==================================================
 // DELETE BLOG
@@ -160,29 +131,18 @@ async function deleteRecord(req, res) {
         let data = await Blog.findOne({ _id: req.params._id });
 
         if (!data) {
-            return res.status(404).send({
-                result: "Fail",
-                reason: "Record Not Found"
-            });
+            return res.status(404).send({ result: "Fail", reason: "Record Not Found" });
         }
 
-        // Delete image
-        try {
-            fs.unlinkSync(data.pic);
-        } catch (e) {}
+        // Delete image from Cloudinary
+        await deleteFromCloudinary(data.pic);
 
         await data.deleteOne();
 
-        res.send({
-            result: "Done",
-            data: data
-        });
+        res.send({ result: "Done", data });
 
     } catch (error) {
-        res.status(500).send({
-            result: "Fail",
-            reason: "Internal Server Error"
-        });
+        res.status(500).send({ result: "Fail", reason: "Internal Server Error" });
     }
 }
 

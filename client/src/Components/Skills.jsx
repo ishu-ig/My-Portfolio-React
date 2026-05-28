@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import "aos/dist/aos.css";
 import AOS from "aos";
-import { getSkill } from "../Redux/ActionCreartors/SkillActionCreators";
+import { getSkill } from "../Redux/ActionCreators/SkillActionCreators";
 
 export default function Skills() {
   let SkillStateData = useSelector((state) => state.SkillStateData);
@@ -34,7 +34,7 @@ export default function Skills() {
             ></path>
           </svg>
         </div>
-        <p className="section-subtitle" style={{ color: "var(--text-color)" }}>
+        <p className="section-subtitle mb-4" style={{ color: "var(--text-color)" }}>
           Enhancing my expertise through continuous learning and innovation.
         </p>
 

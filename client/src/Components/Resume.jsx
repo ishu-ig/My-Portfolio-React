@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { getEducation } from '../Redux/ActionCreartors/EducationActionCreators';
-import { getExperience } from '../Redux/ActionCreartors/ExperienceActionCreators';
+import { getEducation } from '../Redux/ActionCreators/EducationActionCreators';
+import { getExperience } from '../Redux/ActionCreators/ExperienceActionCreators';
 
 
 export default function Resume() {

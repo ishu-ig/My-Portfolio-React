@@ -1,5 +1,27 @@
 const Testimonial = require("../models/Testimonial")
-const fs = require("fs")
+const cloudinary = require("../cloudinary");
+
+// Helper: extract Cloudinary public_id from URL
+function getPublicId(url) {
+    if (!url) return null;
+    // e.g. https://res.cloudinary.com/cloud/image/upload/v123/portfolio/blog/abc.jpg
+    const parts = url.split("/");
+    const uploadIndex = parts.indexOf("upload");
+    if (uploadIndex === -1) return null;
+    // Skip version segment (v123)
+    const pathParts = parts.slice(uploadIndex + 2);
+    return pathParts.join("/").replace(/\.[^/.]+$/, ""); // remove extension
+}
+
+// Helper: delete from Cloudinary
+async function deleteFromCloudinary(url) {
+    const publicId = getPublicId(url);
+    if (!publicId) return;
+    try {
+        await cloudinary.uploader.destroy(publicId);
+    } catch (e) { }
+}
+
 
 async function createRecord(req, res) {
     try {
@@ -85,13 +107,12 @@ async function updateRecord(req, res) {
             data.name = req.body.name ?? data.name
             data.message = req.body.message ?? data.message
             data.active = req.body.active ?? data.active
-            if (await data.save() && req.file) {
-                try {
-                    fs.unlinkSync(data.pic)
-                } catch (error) { }
-                data.pic = req.file.path
-                await data.save()
+            // ✅ After
+            if (req.file) {
+                await deleteFromCloudinary(data.pic); // delete OLD image
+                data.pic = req.file.path;             // set NEW image
             }
+            await data.save()
 
             res.send({
                 result: "Done",
@@ -104,9 +125,7 @@ async function updateRecord(req, res) {
                 reason: "Record Not Found"
             })
     } catch (error) {
-        try {
-            fs.unlinkSync(req.file.path)
-        } catch (error) { }
+        if (req.file) await deleteFromCloudinary(req.file.path);
 
 
         res.status(500).send({
@@ -120,9 +139,8 @@ async function deleteRecord(req, res) {
     try {
         let data = await Testimonial.findOne({ _id: req.params._id })
         if (data) {
-            try {
-                fs.unlinkSync(data.pic)
-            } catch (error) { }
+             // Delete image from Cloudinary
+        await deleteFromCloudinary(data.pic);
             await data.deleteOne()
             res.send({
                 result: "Done",

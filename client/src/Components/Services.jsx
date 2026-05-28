@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { getService } from "../Redux/ActionCreartors/ServiceActionCreators";
+import { getService } from "../Redux/ActionCreators/ServiceActionCreators";
 import { useDispatch, useSelector } from "react-redux";
 import "aos/dist/aos.css";
 import AOS from "aos";

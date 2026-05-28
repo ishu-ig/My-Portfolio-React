@@ -97,6 +97,12 @@ export default function AdminSidebar({ isExpanded }) {
                         <span>Certificates</span>
                     </Link>
                 </li>
+                <li>
+                    <Link to="/achievement" className={`sidebar-link ${isActive("/achievement") ? "active" : ""}`}>
+                        <i className="fa fa-certificate"></i>
+                        <span>Achievement</span>
+                    </Link>
+                </li>
 
                 <li>
                     <Link to="/portfolio" className={`sidebar-link ${isActive("/portfolio") ? "active" : ""}`}>

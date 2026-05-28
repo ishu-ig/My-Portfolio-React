@@ -63,8 +63,11 @@ import AdminService from './pages/service/AdminService';
 import AdminPortfolio from './pages/portfolio/AdminPortfolio';
 import AdminCreatePortfolio from './pages/portfolio/AdminCreatePortfolio';
 import AdminUpdatePortfolio from './pages/portfolio/AdminUpdatePortfolio';
-import AdminContactUsShow from './pages/contactus/AdminContactUsShow';
-import AdminContactUs from './pages/contactus/AdminContactUs';
+import AdminContactUsShow from './pages/contactUs/AdminContactUsShow';
+import AdminContactUs from './pages/contactUs/AdminContactUs';
+import AdminAchievement from './pages/achievement/AdminAchievement';
+import AdminCreateAchievement from './pages/achievement/AdminCreateAchievement';
+import AdminUpdateAchievement from './pages/achievement/AdminUpdateAchievement';
 
 export default function App() {
     const [isSidebarExpanded, setIsSidebarExpanded] = useState(window.innerWidth > 992);
@@ -148,6 +151,11 @@ function MainContent({ isSidebarExpanded, toggleSidebar, checkLoginStatus }) {
                     <Route path="/certificate" element={<AdminCertificate />} />
                     <Route path="/certificate/create" element={<AdminCreateCertificate />} />
                     <Route path="/certificate/update/:_id" element={<AdminUpdateCertificate />} />
+
+                    {/* CERTIFICATE */}
+                    <Route path="/achievement" element={<AdminAchievement />} />
+                    <Route path="/achievement/create" element={<AdminCreateAchievement />} />
+                    <Route path="/achievement/update/:_id" element={<AdminUpdateAchievement />} />
 
                     {/* EDUCATION */}
                     <Route path="/education" element={<AdminEducation />} />

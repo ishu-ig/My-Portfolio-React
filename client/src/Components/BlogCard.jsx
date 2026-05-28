@@ -32,7 +32,7 @@ export default function BlogCard({ blog, index }) {
                 }}
             >
                 <img
-                    src={`${process.env.REACT_APP_BACKEND_SERVER}/${blog.pic}`}
+                    src={blog.pic}
                     alt={blog.title}
                     style={{
                         height: "100%",

@@ -13,6 +13,8 @@ const BlogRouter = require("./BlogRoutes")
 const ResumeRouter = require("./ResumeRoutes")
 const NewsletterRouter = require("./NewsletterRoutes")
 const CommentRouter = require("./CommentRoutes")
+const ServiceRequestRouter = require("./ServiceRequestRoutes")
+const AchievementRouter = require("./AchievementRoutes")
 
 Router.use("/skill", SkillRouter)
 Router.use("/service", ServiceRouter)
@@ -27,5 +29,7 @@ Router.use("/blog", BlogRouter)
 Router.use("/resume",ResumeRouter )
 Router.use("/newsletter",NewsletterRouter)
 Router.use("/comment",CommentRouter)
+Router.use("/servicerequest",ServiceRequestRouter)
+Router.use("/achievement",AchievementRouter)
 
 module.exports = Router

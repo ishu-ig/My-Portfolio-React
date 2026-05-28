@@ -1,5 +1,5 @@
 const Service = require("../models/Service")
-const fs = require("fs");
+;
 const syncResume = require("../resumeSync/resumeSync");
 
 async function createRecord(req, res) {
@@ -147,4 +147,67 @@ module.exports = {
     getSingleRecord: getSingleRecord,
     updateRecord:updateRecord,
     deleteRecord:deleteRecord
+}
+
+async function sentRequest(req, res) {
+    try {
+        let data = new ContactUs(req.body)
+        await data.save()
+        mailer.sendMail({
+            from: process.env.MAIL_SENDER,
+            to: data.email,
+            subject: "Your Query Submission - " + process.env.SITE_NAME,
+            html: `
+                <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f9f9f9;">
+                    <h2 style="color: #333;">Hello,</h2>
+                    <p style="color: #555;">
+                        Thank you for reaching out to us. Here are the details of your query:
+                    </p>
+                    <table style="border-collapse: collapse; width: 100%;">
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ddd;"><strong>Subject:</strong></td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">${data.subject}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ddd;"><strong>Message:</strong></td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">${data.message}</td>
+                        </tr>
+                    </table>
+                    <p style="color: #555;">
+                        We will get back to you as soon as possible. If you need immediate assistance, visit our
+                        <a href="${process.env.SERVER}/contact" style="color: #007bff;">Contact Page</a>.
+                    </p>
+                    <p style="color: #555;">Best Regards, <br> Team ${process.env.SITE_NAME}</p>
+                </div>
+            `,
+        }, (error) => {
+            if (error) console.log(error);
+        })
+
+        res.send({
+            result: "Done",
+            data: data,
+            message: "Thanks to Share Your Query With Us. Our Team Will Contact You Soon!!!"
+        })
+    } catch (error) {
+        let errorMessage = {}
+        error.errors?.name ? errorMessage.name = error.errors.name.message : null
+        error.errors?.email ? errorMessage.email = error.errors.email.message : null
+        error.errors?.phone ? errorMessage.phone = error.errors.phone.message : null
+        error.errors?.subject ? errorMessage.subject = error.errors.subject.message : null
+        error.errors?.message ? errorMessage.message = error.errors.message.message : null
+
+        if (Object.values(errorMessage).length === 0) {
+            res.status(500).send({
+                result: "Fail",
+                reason: "Internal Server Error"
+            })
+        }
+        else {
+            res.status(400).send({
+                result: "Fail",
+                reason: errorMessage
+            })
+        }
+    }
 }

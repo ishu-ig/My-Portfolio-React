@@ -1,6 +1,7 @@
 const Skill = require("../models/Skill")
-const fs = require("fs");
+;
 const syncResume = require("../resumeSync/resumeSync");
+
 
 async function createRecord(req, res) {
     try {

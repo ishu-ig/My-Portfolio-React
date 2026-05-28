@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { createNewsletter } from "../Redux/ActionCreartors/NewsletterActionCreators";
+import { createNewsletter } from "../Redux/ActionCreators/NewsletterActionCreators";
 import AOS from "aos";
 import "aos/dist/aos.css";
 

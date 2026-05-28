@@ -1,16 +1,33 @@
-const multer = require("multer")
+const multer = require("multer");
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+const cloudinary = require("../cloudinary");
 
 function createUploader(folder) {
-    const storage = multer.diskStorage({
-        destination: function (req, file, cb) {
-            cb(null, `public/uploads/${folder}`)
-        },
-        filename: function (req, file, cb) {
-            cb(null, Date.now() + file.originalname)
-        }
-    })
+    const storage = new CloudinaryStorage({
+        cloudinary,
+        params: async (req, file) => {
+            const cleanName = file.originalname
+                .replace(/\s+/g, "_")
+                .replace(/[()]/g, "")
+                .replace(/[^a-zA-Z0-9._-]/g, "");
 
-    return multer({ storage: storage })
+            const isPdf = file.mimetype === "application/pdf";
+
+            return {
+                folder: `portfolio/${folder}`,
+                allowed_formats: ["jpg", "jpeg", "png", "webp", "pdf"],
+                resource_type: isPdf ? "raw" : "image",
+                public_id: `${Date.now()}_${cleanName.split(".")[0]}`,
+            };
+        },
+    });
+
+    return multer({
+        storage,
+        limits: {
+            fileSize: 10 * 1024 * 1024, // 10MB
+        },
+    });
 }
 
 module.exports = {
@@ -18,5 +35,5 @@ module.exports = {
     certificateUploader: createUploader("certificate"),
     testimonialUploader: createUploader("testimonial"),
     userUploader: createUploader("user"),
-    blogUploader: createUploader("blog")
-}
+    blogUploader: createUploader("blog"),
+};

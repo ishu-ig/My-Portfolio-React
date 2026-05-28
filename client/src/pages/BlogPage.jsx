@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getBlog } from "../Redux/ActionCreartors/BlogActionCreators";
+import { getBlog } from "../Redux/ActionCreators/BlogActionCreators";
 import BlogCard from "../Components/BlogCard";
 import { Link } from "react-router-dom";
 import AOS from "aos";

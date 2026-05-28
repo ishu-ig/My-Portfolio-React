@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getBlog } from "../Redux/ActionCreartors/BlogActionCreators";
+import { getBlog } from "../Redux/ActionCreators/BlogActionCreators";
 import {
   getComment,
   createComment,
-} from "../Redux/ActionCreartors/CommentActionCreators";
+} from "../Redux/ActionCreators/CommentActionCreators";
 
 import { Link, useParams } from "react-router-dom";
 import AOS from "aos";
@@ -120,7 +120,7 @@ export default function BlogDetail() {
 
         {/* BLOG IMAGE */}
         <img
-          src={`${process.env.REACT_APP_BACKEND_SERVER}/${blog.pic}`}
+          src={blog.pic}
           alt={blog.title}
           className="img-fluid rounded shadow-sm w-100 mb-4"
           style={{ maxHeight: "300px", objectFit: "cover" }}
@@ -311,7 +311,7 @@ export default function BlogDetail() {
                   >
                     <div className="card shadow-sm border-0">
                       <img
-                        src={`${process.env.REACT_APP_BACKEND_SERVER}/${item.pic}`}
+                        src={item.pic}
                         alt={item.title}
                         className="w-100"
                         style={{ height: "150px", objectFit: "cover" }}
