@@ -1,8 +1,5 @@
 const Achievement = require("../Models/Achievement");
 
-/* ─────────────────────────────────────────
-   GET ALL  →  GET /api/achievement
-───────────────────────────────────────── */
 const getRecord = async (req, res) => {
   try {
     const records = await Achievement.find().sort({ order: 1, createdAt: 1 });
@@ -12,9 +9,6 @@ const getRecord = async (req, res) => {
   }
 };
 
-/* ─────────────────────────────────────────
-   GET ONE  →  GET /api/achievement/:id
-───────────────────────────────────────── */
 const getSingleRecord = async (req, res) => {
   try {
     const record = await Achievement.findById(req.params.id);
@@ -26,10 +20,6 @@ const getSingleRecord = async (req, res) => {
   }
 };
 
-/* ─────────────────────────────────────────
-   CREATE  →  POST /api/achievement
-   Body: { icon, label, type, target?, stat?, order?, active? }
-───────────────────────────────────────── */
 const createRecord = async (req, res) => {
   try {
     const { icon, label, type, target, stat, order, active } = req.body;
@@ -60,9 +50,6 @@ const createRecord = async (req, res) => {
   }
 };
 
-/* ─────────────────────────────────────────
-   UPDATE  →  PUT /api/achievement/:id
-───────────────────────────────────────── */
 const updateRecord = async (req, res) => {
   try {
     const { icon, label, type, target, stat, order, active } = req.body;
@@ -86,9 +73,6 @@ const updateRecord = async (req, res) => {
   }
 };
 
-/* ─────────────────────────────────────────
-   DELETE  →  DELETE /api/achievement/:id
-───────────────────────────────────────── */
 const deleteRecord = async (req, res) => {
   try {
     const record = await Achievement.findByIdAndDelete(req.params.id);
@@ -100,28 +84,10 @@ const deleteRecord = async (req, res) => {
   }
 };
 
-/* ─────────────────────────────────────────
-   TOGGLE ACTIVE  →  PATCH /api/achievement/:id/toggle
-───────────────────────────────────────── */
-const toggleRecord = async (req, res) => {
-  try {
-    const record = await Achievement.findById(req.params.id);
-    if (!record)
-      return res.status(404).json({ message: "Record not found" });
-
-    record.active = !record.active;
-    const updated = await record.save();
-    res.status(200).json(updated);
-  } catch (err) {
-    res.status(500).json({ message: "Server error", error: err.message });
-  }
-};
-
 module.exports = {
   getRecord,
   getSingleRecord,
   createRecord,
   updateRecord,
   deleteRecord,
-  toggleRecord,
 };

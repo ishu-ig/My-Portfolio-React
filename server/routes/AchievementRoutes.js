@@ -16,6 +16,5 @@ RecordRouter.get("/:id",       getSingleRecord);
 RecordRouter.post("/",         createRecord);
 RecordRouter.put("/:id",       updateRecord);
 RecordRouter.delete("/:id",    deleteRecord);
-RecordRouter.patch("/:id/toggle", toggleRecord);
 
 module.exports = RecordRouter;
