@@ -1,21 +1,16 @@
 "use client";
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { ThemeContext } from "../ThemeContext";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import formValidator from "../FormValidators/formValidator";
 import { createContactUs } from "../Redux/ActionCreators/ContactUsActionCreators";
-
-const contactInfo = [
-    { icon: "bi-envelope", label: "Email",    value: "ishaanguptacse@gmail.com" },
-    { icon: "bi-telephone", label: "Phone",   value: "+91 82186 35344" },
-    { icon: "bi-geo-alt",   label: "Location", value: "India" },
-];
+import { getAbout } from "../Redux/ActionCreators/AboutActionCreators"; // ← import
 
 const socials = [
-    { icon: "bi-github",    href: "#" },
-    { icon: "bi-linkedin",  href: "https://www.linkedin.com/in/ishaan-gupta-2a0568242" },
-    { icon: "bi-instagram", href: "https://www.instagram.com/_ishaan_12" },
-    { icon: "bi-twitter-x", href: "#" },
+    { icon: "bi-github",    key: "github" },
+    { icon: "bi-linkedin",  key: "linkedin" },
+    { icon: "bi-instagram", key: "instagram" },
+    { icon: "bi-twitter-x", key: "twitter" },
 ];
 
 const fields = [
@@ -28,6 +23,19 @@ const fields = [
 export default function ContactUs() {
     const { theme } = useContext(ThemeContext);
     const dispatch = useDispatch();
+
+    // ── Pull about data from Redux ──
+    const AboutStateData = useSelector(state => state.AboutStateData);
+    const about = AboutStateData?.[0] || null;
+
+    useEffect(() => { dispatch(getAbout()); }, [dispatch]);
+
+    // ── Build contact info dynamically from about ──
+    const contactInfo = [
+        { icon: "bi-envelope",  label: "Email",    value: about?.email    || "—" },
+        { icon: "bi-telephone", label: "Phone",    value: about?.phone    || "—" },
+        { icon: "bi-geo-alt",   label: "Location", value: about?.nationality || "India" },
+    ];
 
     const defaultText = "Have questions? We are here to help. Reach out to us anytime and we'll get back to you as soon as possible.";
     const thankYouText = "Thank you for contacting us! We will reach out to you soon. 🎉";
@@ -113,7 +121,7 @@ export default function ContactUs() {
                                 Have a project in mind or just want to say hi? Fill in the form and I'll get back to you within 24 hours.
                             </p>
 
-                            {/* Contact info cards */}
+                            {/* ── Contact info cards (from About) ── */}
                             <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 24 }}>
                                 {contactInfo.map((item, i) => (
                                     <div key={i} style={{
@@ -136,27 +144,31 @@ export default function ContactUs() {
                                 ))}
                             </div>
 
-                            {/* Social icons */}
+                            {/* ── Social icons (from About) ── */}
                             <div style={{ display: "flex", gap: 8 }}>
-                                {socials.map((s, i) => (
-                                    <a
-                                        key={i}
-                                        href={s.href}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        style={{
-                                            width: 36, height: 36, borderRadius: "50%",
-                                            border: "1px solid var(--border-color)",
-                                            display: "flex", alignItems: "center", justifyContent: "center",
-                                            color: "var(--muted-color)", fontSize: 15, textDecoration: "none",
-                                            transition: "background 0.2s, color 0.2s, border-color 0.2s",
-                                        }}
-                                        onMouseEnter={e => { e.currentTarget.style.background = "var(--primary-color)"; e.currentTarget.style.color = "#fff"; e.currentTarget.style.borderColor = "var(--primary-color)"; }}
-                                        onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--muted-color)"; e.currentTarget.style.borderColor = "var(--border-color)"; }}
-                                    >
-                                        <i className={`bi ${s.icon}`}></i>
-                                    </a>
-                                ))}
+                                {socials.map((s, i) => {
+                                    const href = about?.[s.key] || "#";
+                                    if (!about?.[s.key]) return null; // hide if no link saved
+                                    return (
+                                        <a
+                                            key={i}
+                                            href={href}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            style={{
+                                                width: 36, height: 36, borderRadius: "50%",
+                                                border: "1px solid var(--border-color)",
+                                                display: "flex", alignItems: "center", justifyContent: "center",
+                                                color: "var(--muted-color)", fontSize: 15, textDecoration: "none",
+                                                transition: "background 0.2s, color 0.2s, border-color 0.2s",
+                                            }}
+                                            onMouseEnter={e => { e.currentTarget.style.background = "var(--primary-color)"; e.currentTarget.style.color = "#fff"; e.currentTarget.style.borderColor = "var(--primary-color)"; }}
+                                            onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--muted-color)"; e.currentTarget.style.borderColor = "var(--border-color)"; }}
+                                        >
+                                            <i className={`bi ${s.icon}`}></i>
+                                        </a>
+                                    );
+                                })}
                             </div>
                         </div>
 
@@ -169,7 +181,7 @@ export default function ContactUs() {
                         }}>
                             <form onSubmit={postData} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
 
-                                {/* Name + Email — full width */}
+                                {/* Name + Email */}
                                 {fields.slice(0, 2).map(f => (
                                     <div key={f.name}>
                                         <label style={{ fontSize: 11, fontWeight: 500, color: "var(--muted-color)", textTransform: "uppercase", letterSpacing: "1px", display: "block", marginBottom: 5 }}>

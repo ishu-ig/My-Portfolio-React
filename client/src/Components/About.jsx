@@ -1,20 +1,38 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import 'aos/dist/aos.css';
 import AOS from 'aos';
+import { useDispatch, useSelector } from 'react-redux';
+import { getAbout } from '../Redux/ActionCreators/AboutActionCreators';
 
 export default function About() {
-    React.useEffect(() => {
+    const dispatch = useDispatch();
+    const AboutStateData = useSelector((state) => state.AboutStateData);
+    const [data, setData] = useState(null);
+
+    useEffect(() => {
         AOS.init({ duration: 1000 });
     }, []);
 
+    useEffect(() => {
+        dispatch(getAbout());
+    }, []);
+
+    useEffect(() => {
+        if (AboutStateData?.length) {
+            setData(AboutStateData[0]);
+        }
+    }, [AboutStateData]);
+
+    if (!data) return null;
+
     const personalInfo = [
-        { label: 'Name', value: 'Ishaan Gupta' },
-        { label: 'Phone', value: '+91-8218635344' },
-        { label: 'Age', value: '23 Years' },
-        { label: 'Email', value: 'ishaanguptacse@gmail.com' },
-        { label: 'Occupation', value: 'Full Stack Developer' },
-        { label: 'Nationality', value: 'Indian' },
-    ];
+        { label: 'Name',        value: data.name },
+        { label: 'Phone',       value: data.phone },
+        { label: 'Age',         value: data.age ? `${data.age} Years` : null },
+        { label: 'Email',       value: data.email },
+        { label: 'Occupation',  value: data.occupation },
+        { label: 'Nationality', value: data.nationality },
+    ].filter((item) => item.value);
 
     return (
         <section
@@ -33,11 +51,11 @@ export default function About() {
                                 fill="none"
                                 stroke="currentColor"
                                 strokeWidth="2"
-                            ></path>
+                            />
                         </svg>
                     </div>
                     <p className="section-subtitle" style={{ color: "var(--text-color)" }}>
-                        Passionate about building scalable web applications and exploring the latest technologies in full stack development.
+                        {data.subtitle}
                     </p>
                 </div>
 
@@ -46,8 +64,8 @@ export default function About() {
                     <div className="col-lg-6 text-center" data-aos="fade-right">
                         <div className="about-image">
                             <img
-                                src="/img/profile/my_image.jpg"
-                                alt="Profile"
+                                src={data.pic || "/img/profile/my_image.jpg"}
+                                alt={data.name}
                                 className="img-fluid rounded-4 shadow-lg"
                             />
                         </div>
@@ -58,17 +76,20 @@ export default function About() {
                         <div className="about-content">
                             <h3 className="subtitle">About Me</h3>
                             <h2 className="about-heading" style={{ color: "var(--text-color)" }}>
-                                Full Stack Web Developer & Programmer
+                                {data.heading}
                             </h2>
                             <p className="lead" style={{ color: "var(--text-color)" }}>
-                                I specialize in building modern web applications using cutting-edge technologies like React, Node.js, MongoDB, and more. I enjoy solving complex problems and continuously improving my coding skills.
+                                {data.shortDescription}
                             </p>
                             <p className="mb-5" style={{ color: "var(--text-color)" }}>
-                                My goal is to develop innovative and efficient solutions that enhance user experience and drive business success.
+                                {data.longDescription}
                             </p>
 
                             {/* Personal Info Cards */}
-                            <div className="personal-info" style={{ backgroundColor: "var(--bg-color)", color: "var(--text-color)" }}>
+                            <div
+                                className="personal-info"
+                                style={{ backgroundColor: "var(--bg-color)", color: "var(--text-color)" }}
+                            >
                                 {personalInfo.map((item, index) => (
                                     <div key={index} className="info-card">
                                         <p><strong>{item.label}:</strong></p>
@@ -76,6 +97,19 @@ export default function About() {
                                     </div>
                                 ))}
                             </div>
+
+                            {/* Resume Button */}
+                            {/* {data.resume && (
+                                <a
+                                    href={data.resume}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="btn btn-primary mt-4"
+                                >
+                                    <i className="bi bi-file-earmark-pdf me-2"></i>
+                                    Download Resume
+                                </a>
+                            )} */}
                         </div>
                     </div>
                 </div>
