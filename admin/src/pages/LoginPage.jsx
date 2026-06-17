@@ -206,9 +206,9 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <div className="auth-footer">
+          {/* <div className="auth-footer">
             New here? <Link to="/register">Create an account</Link>
-          </div>
+          </div> */}
 
         </section>
       </main>
