@@ -6,7 +6,9 @@ const THEME_KEY = "adminHMD.colorTheme";
 function getPreferredTheme() {
   const saved = localStorage.getItem(THEME_KEY);
   if (saved === "dark" || saved === "light") return saved;
-  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  return window.matchMedia("(prefers-color-scheme: dark)").matches
+    ? "dark"
+    : "light";
 }
 
 function applyTheme(theme) {
@@ -18,12 +20,12 @@ function applyTheme(theme) {
 export default function LoginPage() {
   const navigate = useNavigate();
 
-  const [email,     setEmail]     = useState("");
-  const [password,  setPassword]  = useState("");
-  const [remember,  setRemember]  = useState(false);
+  const [data, setData] = useState({ username: "", password: "" });
+  const [remember, setRemember] = useState(false);
   const [validated, setValidated] = useState(false);
-  const [error,     setError]     = useState("");
-  const [loading,   setLoading]   = useState(false);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   // Apply theme on mount
   useEffect(() => {
@@ -32,15 +34,17 @@ export default function LoginPage() {
     return () => document.body.classList.remove("auth-body");
   }, []);
 
-  // Read current theme for the icon
   const [theme, setTheme] = useState(
-    () => document.documentElement.getAttribute("data-theme") || "light"
+    () => document.documentElement.getAttribute("data-theme") || "light",
   );
   useEffect(() => {
     const observer = new MutationObserver(() => {
       setTheme(document.documentElement.getAttribute("data-theme") || "light");
     });
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-theme"],
+    });
     return () => observer.disconnect();
   }, []);
 
@@ -48,41 +52,64 @@ export default function LoginPage() {
     applyTheme(theme === "dark" ? "light" : "dark");
   }
 
+  // ── From file 1: single getInputData handler + clears error on change ────────
+  function getInputData(e) {
+    const { name, value } = e.target;
+    setError("");
+    setData((old) => ({ ...old, [name]: value }));
+  }
+
+  // ── From file 1: postData logic (Admin / Super Admin roles) ──────────────────
   async function handleSubmit(e) {
     e.preventDefault();
     setValidated(true);
     if (!e.target.checkValidity()) return;
 
     setLoading(true);
-    setError("");
     try {
-      let response = await fetch(`${process.env.REACT_APP_BACKEND_SERVER}/api/user/login`, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ username: email, password }),
-      });
+      let response = await fetch(
+        `${process.env.REACT_APP_BACKEND_SERVER}/api/user/login`,
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            username: data.username,
+            password: data.password,
+          }),
+        },
+      );
       response = await response.json();
 
       if (response.result === "Done" && response.data.active === false) {
         setError("Your account is inactive. Please contact support.");
       } else if (response.result === "Done") {
-        if (response.data.role === "Recruiter" || response.data.role === "Super Admin") {
+        if (
+          response.data.role === "Admin" ||
+          response.data.role === "Super Admin"
+        ) {
           localStorage.setItem("login", true);
           localStorage.setItem("name", response.data.name);
           localStorage.setItem("userid", response.data._id);
           localStorage.setItem("role", response.data.role);
           localStorage.setItem("token", response.token);
-          const incomplete = ["address", "state", "pin", "phone", "name", "city"]
-            .some(f => !response.data[f]);
+          const incomplete = [
+            "address",
+            "state",
+            "pin",
+            "phone",
+            "name",
+            "city",
+          ].some((f) => !response.data[f]);
           navigate(incomplete ? "/profile" : "/");
         } else {
           setError("You are not authorized to access this panel.");
+          localStorage.setItem("login", false);
         }
       } else {
-        setError("Invalid email or password.");
+        setError("Invalid username/email or password.");
       }
     } catch {
-      setError("Internal Server Error. Please try again.");
+      alert("Internal Server Error");
     } finally {
       setLoading(false);
     }
@@ -106,7 +133,6 @@ export default function LoginPage() {
 
       <main className="auth-page">
         <section className="auth-card">
-
           {/* Brand */}
           <Link className="auth-brand" to="/">
             <span className="brand-icon">
@@ -135,7 +161,9 @@ export default function LoginPage() {
             <div className="mb-4">
               <p className="eyebrow mb-1">Secure Access</p>
               <h1 className="h3 mb-1">Login</h1>
-              <p className="text-muted mb-0">Sign in to your admin workspace.</p>
+              <p className="text-muted mb-0">
+                Sign in to your admin workspace.
+              </p>
             </div>
 
             {error && (
@@ -144,20 +172,20 @@ export default function LoginPage() {
               </div>
             )}
 
-            {/* Email */}
+            {/* Username */}
             <div className="mb-3">
-              <label className="form-label" htmlFor="loginEmail">
-                Email address
+              <label className="form-label" htmlFor="loginUserName">
+                Email Address or Username
               </label>
               <input
                 className="form-control"
-                id="loginEmail"
-                type="email"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
+                id="loginUserName"
+                name="username"
+                value={data.username}
+                onChange={getInputData}
                 required
               />
-              <div className="invalid-feedback">Enter a valid email.</div>
+              <div className="invalid-feedback">Enter a valid username.</div>
             </div>
 
             {/* Password */}
@@ -166,21 +194,36 @@ export default function LoginPage() {
                 <label className="form-label" htmlFor="loginPassword">
                   Password
                 </label>
-                <Link className="small fw-semibold" to="/forgot-password">
+                <Link className="small fw-semibold" to="/forgetPassword-1">
                   Forgot?
                 </Link>
               </div>
-              <input
-                className="form-control"
-                id="loginPassword"
-                type="password"
-                minLength={6}
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                required
-              />
-              <div className="invalid-feedback">
-                Password must be at least 6 characters.
+              <div className="position-relative">
+                <input
+                  className="form-control pe-5"
+                  id="loginPassword"
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  minLength={6}
+                  value={data.password}
+                  onChange={getInputData}
+                  required
+                />
+                <button
+                  type="button"
+                  className="btn btn-link position-absolute top-50 end-0 translate-middle-y pe-3 text-muted"
+                  onClick={() => setShowPassword((v) => !v)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  tabIndex={-1}
+                >
+                  <i
+                    className={showPassword ? "bi bi-eye-slash" : "bi bi-eye"}
+                    aria-hidden="true"
+                  />
+                </button>
+                <div className="invalid-feedback">
+                  Password must be at least 6 characters.
+                </div>
               </div>
             </div>
 
@@ -191,25 +234,39 @@ export default function LoginPage() {
                 type="checkbox"
                 id="rememberMe"
                 checked={remember}
-                onChange={e => setRemember(e.target.checked)}
+                onChange={(e) => setRemember(e.target.checked)}
               />
               <label className="form-check-label" htmlFor="rememberMe">
                 Remember me
               </label>
             </div>
 
-            <button className="btn btn-primary w-100" type="submit" disabled={loading}>
-              {loading
-                ? <><span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true" /> Signing in…</>
-                : <><i className="bi bi-box-arrow-in-right" aria-hidden="true" /> Sign In</>
-              }
+            <button
+              className="btn btn-primary w-100"
+              type="submit"
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <span
+                    className="spinner-border spinner-border-sm me-2"
+                    role="status"
+                    aria-hidden="true"
+                  />{" "}
+                  Signing in…
+                </>
+              ) : (
+                <>
+                  <i className="bi bi-box-arrow-in-right" aria-hidden="true" />{" "}
+                  Sign In
+                </>
+              )}
             </button>
           </form>
 
           {/* <div className="auth-footer">
             New here? <Link to="/register">Create an account</Link>
           </div> */}
-
         </section>
       </main>
     </>
